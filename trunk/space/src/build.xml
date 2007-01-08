@@ -1,0 +1,70 @@
+<project name="lstore" basedir=".">
+	<property name="dir.build" value="../" />
+	<property name="dir.build.src" value="${dir.build}/src/" />
+	<property name="dir.build.doc" value="${dir.build.src}/herschel/ia/pal/pool/lstore/doc" />
+	<property name="dir.build.doc.api" value="${dir.build.doc}/api" />
+	<property name="dir.build.doc.report" value="${dir.build.doc}/testing_reports" />
+	<property name="dir.build.doc.report.performance" value="${dir.build.doc}/testing_reports/current" />
+	<property name="dir.build.src.test" value="${dir.build.src}/herschel/ia/pal/pool/lstore/test" />
+	<property name="dir.build.classes" value="${dir.build}/classes" />
+	<property name="dir.build.jar" value="${dir.build}/lstore.jar" />
+	<property name="javacc.home" value="D:\dev\javacc-4.0" />
+
+	<path id="lib.classpath">
+		<pathelement location="${dir.build.classes}" />
+		<pathelement location="E:/NAO/Code/spire_331/lib/hcss/lib/hcss.jar" />
+		<pathelement location="D:\dev\junit3.8.1\junit.jar" />
+		<pathelement location="E:/NAO/Code/spire_331/lib/hcss/lib/ext/hcssExtLibs.jar" />
+	</path>
+
+	<target name="init">
+		<mkdir dir="${dir.build.classes}" />
+		<mkdir dir="${dir.build.doc.report}" />
+		<mkdir dir="${dir.build.doc.report.performance}" />
+	</target>
+	<target name="compile" depends="init">
+		<javac compiler="javac1.5" srcdir="${dir.build.src}" destdir="${dir.build.classes}" debug="off" target="1.5" source="1.5" />
+		<jar destfile="${dir.build.jar}">
+			<fileset dir="${dir.build.classes}" />
+		</jar>
+	</target>
+
+	<target name="javacc">
+		<javacc target="herschel/ia/pal/query/parser/PALParser.jj" outputdirectory="herschel/ia/pal/query/parser/" javacchome="${javacc.home}" static="false" />
+
+		<jjdoc target="herschel/ia/pal/query/parser/PALParser.jj" outputfile="${dir.build.doc}/PALParserBNF.html" javacchome="${javacc.home}" />
+	</target>
+
+	<target name="junit" depends="compile" description="Execute Unit Tests">
+		<junit maxmemory="512m" fork="true">
+			<classpath refid="lib.classpath" />
+			<formatter type="xml" />
+			<batchtest todir="${dir.build.doc.report.performance}">
+				<fileset dir="${dir.build.classes}">
+					<include name="**/**PerformanceTest.class" />
+					<!--
+	          <include name="**/lstore/**/*Test.class" />
+		      <include name="**/lstore/**/*Tests.class" />
+		      -->
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${dir.build.doc.report.performance}">
+			<fileset dir="${dir.build.doc.report.performance}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${dir.build.doc.report.performance}" />
+		</junitreport>
+	</target>
+
+	<target name="javadoc">
+		<javadoc destDir="${dir.build.doc.api}" Locale="en">
+			<packageset dir="${dir.build.src}" defaultexcludes="yes">
+				<include name="**" />
+			</packageset>
+		</javadoc>
+
+	</target>
+
+</project>

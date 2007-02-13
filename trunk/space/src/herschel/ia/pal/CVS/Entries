@@ -1,0 +1,20 @@
+/.cvsignore/1.1/Thu Dec  7 18:04:58 2006//
+/CHANGELOG/-1.1/Fri Dec  1 07:51:35 2006//
+/Context.java/-1.1/Fri Dec  1 07:51:35 2006//
+/ContextRuleException.java/-1.1/Wed Jun 21 15:02:36 2006//
+/JythonInterpretor.java/-1.1/Wed Nov 29 16:49:26 2006//
+/ListContext.java/-1.1/Fri Dec  1 07:51:35 2006//
+/MapContext.java/-1.1/Fri Dec  1 07:51:35 2006//
+/ProductPool.java/-1.1/Wed Jun 21 15:02:36 2006//
+/ProductRef.java/-1.1/Fri Dec  1 07:51:36 2006//
+/ProductStorage.java/-1.1/Fri Dec  1 07:51:36 2006//
+/__init__.py/-1.1/Wed Jun 21 15:02:36 2006//
+/all.py/-1.1/Wed Jun 21 15:02:36 2006//
+D/doc////
+/herschel.ia.pal.urm.xml/-1.1/Thu Jul  6 09:29:06 2006//
+/index.html/-1.1/Thu Dec  7 17:29:47 2006//
+/jake.config/-1.1/Fri Dec  1 07:51:36 2006//
+/package.html/-1.1/Fri Nov  3 16:58:22 2006//
+D/pool////
+D/query////
+D/rule////

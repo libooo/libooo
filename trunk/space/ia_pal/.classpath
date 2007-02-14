@@ -3,7 +3,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Herschel_Lib"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/VERSANT_LIB"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Spire_Lib"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

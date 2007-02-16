@@ -22,7 +22,8 @@ class parser:
 		tokenize(StringIO(s).readline,self.ter)
 		g = self.toks
 		result = []
-		cc=''
+		mcc=''
+		acc=''
 		#print 'locals: ',lo
 		#print 'globals: ',gl
 		formerToknum=ENDMARKER
@@ -35,7 +36,7 @@ class parser:
 					if formerTokval!='.':
 						if self.product.meta.containsKey(tokval)==0:
 							self.isAllAttrib=0
-							cc+=v+'.meta.containsKey(\''+tokval+'\')'+' and '
+							mcc+=v+'.meta.containsKey(\''+tokval+'\')'+' and '
 							tokval= v+'.meta[\''+ tokval+'\'].value'
 						else:
 							tokval=v+"."+tokval
@@ -45,10 +46,13 @@ class parser:
 					tokval=v+tokval
 					self.isAllAttrib=0
 					self.isAllMeta=0
+			if toknum==STRING:
+				if formerTokval==v+'[':
+					acc+=v+'.containsKey('+tokval+')'+' and '
 			formerTokval=tokval
 			formerToknum=toknum
 			result.append((toknum, tokval))
-		return cc+untokenize(result)
+		return mcc+acc+untokenize(result)
 		
 if __name__ == '__main__':
 	p=parser()

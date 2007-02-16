@@ -17,7 +17,11 @@ print store.getContext().getStoreDir();
 # rebuild index, this is intended be called when the index files are corruptted.  
 print store.rebuildIndex()
 
-p=Product(creator="Scott", description="Tiger");
+p=Product(creator="Scott", description="Tiger")
+x=Double1d.range(100)
+t=TableDataset(description="This is a table")
+t["x"]=Column(x)
+#p["myTable"]=t
 # save product
 urn=store.save(p);
 print urn;
@@ -79,8 +83,9 @@ a=3
 b=4
 query=Query( "type=='AbcProduct' and creator=='Scott' and ABS(a-b)>0")
 #query.where will be converted to: 
-#  query=Query( "type=='AbcProduct' and creator=='Scott' and ABS(a-b)>0")
+#  query=Query( "p.type =='AbcProduct'and p.creator =='Scott'and ABS (a -b )>0 ")
 print query.where
+print query.queryType
 results=store.select(query);
 print results
 
@@ -106,8 +111,13 @@ print results
 
 #data mining query
 #can not work yet! 
-query=Query("['A1']['flux'].data > 0.01")
+query=Query("['myTable']['x'].data[20] > 10")
 # should get p['A1']['flux'].data > 0.01, but not current "['A1']['flux'].p.data >0.01"
 print query.where
+print query.queryType
+results=store.select(query);
+print results
 
-
+query=FullQuery(Product,"p","p.containsKey('myTable') and p['myTable']['x'].data[20] > 10")
+rrr=store.select(query)
+print rrr

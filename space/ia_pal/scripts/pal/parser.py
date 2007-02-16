@@ -19,7 +19,7 @@ class parser:
 		return self.queryType
 	def tokeater(self,toknum,tokval,spos,epos,line):
 		self.toks.append((toknum,tokval,spos,epos,line))	
-	def parse(self,queryStr,var='p',globNameSpace=globals(),localNameSpace=locals()):
+	def parse(self,queryStr,var='p',globNameSpace=globals(),localNameSpace=locals(),isNoFieldsIgnored=1):
 		self.toks=[]	
 		tokenize(StringIO(queryStr).readline,self.tokeater)
 		tokens = self.toks
@@ -49,10 +49,13 @@ class parser:
 			formerTokval=tokval
 			formerToknum=toknum
 			result.append((toknum, tokval))
-		return metaContainsClause+datasetContainsClause+untokenize(result)
+            	if isNoFieldsIgnored:
+                	parsedQuery = metaContainsClause+datasetContainsClause+untokenize(result)
+            	else:
+                	parsedQuery = untokenize(result)
+		return parsedQuery
 		
 if __name__ == '__main__':
-
 	p=parser()
 	s = 'creator=="scott" and ABS(creationDate-endDate)<10'
 	print p.parse(s)	
@@ -62,7 +65,7 @@ if __name__ == '__main__':
 	print p.parse(s, 'x')
 	print p.getQueryType()
 
-	s = ' ["a1"][3]=="scott" and ABS(cDate-endDate)<10'
+	s = ' ["a1"][3].value=="scott" and ABS(cDate-endDate)<10'
 	print p.parse(s)	
 	print p.getQueryType()
 	

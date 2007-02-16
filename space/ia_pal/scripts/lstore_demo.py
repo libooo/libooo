@@ -80,11 +80,11 @@ print storeFoo.select(query);
 from pal.parser import *
 p=parser()
 a=3
-b=4
 query=Query( "type=='AbcProduct' and creator=='Scott' and ABS(a-b)>0")
 #query.where will be converted to: 
-#  query=Query( "p.type =='AbcProduct'and p.creator =='Scott'and ABS (a -b )>0 ")
+#  p.meta.containsKey('b') and p.type =='AbcProduct'and p.creator =='Scott'and ABS (a -p.meta['b'].value )>0 
 print query.where
+#queryType is MetaQuery
 print query.queryType
 results=store.select(query);
 print results
@@ -94,17 +94,9 @@ def sumABB(a,b):
 	return a+b+b
 
 #query with user defined function
-query=Query("type=='AbcProduct' and creator=='Scott' and sumABB(a, b)<0")
+query=Query("type=='AbcProduct' and creator=='Scott' and sumABB(a, b)>0")
 #query.where will be converted to: 
-#  p.type =='AbcProduct'and p.creator =='Scott'and sumABB (a ,b )<0 
-print query.where
-results=store.select(query);
-print results
-
-#trivial one, variable used in query could be specified
-query=Query(Product,'x', "type=='AbcProduct' and creator=='Scott' and sumABB(a, b)>0")
-#query.where will be converted to: 
-#  x.type =='AbcProduct'and x.creator =='Scott'and sumABB (a ,b )>0  
+#  p.type =='AbcProduct'and p.creator =='Scott'and sumABB (a ,b )>0 
 print query.where
 results=store.select(query);
 print results
@@ -112,12 +104,10 @@ print results
 #data mining query
 #can not work yet! 
 query=Query("['myTable']['x'].data[20] > 10")
-# should get p['A1']['flux'].data > 0.01, but not current "['A1']['flux'].p.data >0.01"
+#query.where will be converted to: 
+#  p.containsKey('myTable') and p['myTable']['x'].data [20 ]>10 
 print query.where
 print query.queryType
 results=store.select(query);
 print results
 
-query=FullQuery(Product,"p","p.containsKey('myTable') and p['myTable']['x'].data[20] > 10")
-rrr=store.select(query)
-print rrr

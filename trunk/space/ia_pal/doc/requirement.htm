@@ -6,91 +6,108 @@
 
 <body>
 
-<h1>Requirements on PAL Query Improvement </h1>
-<p>Steve Guest, Maohai Huang, Li Bo</p>
-<p>2007-01-29</p>
-<h2>1. Ease of use</h2>
+<h1 style="text-align: center">Requirements on PAL Query Improvement </h1>
+<p style="text-align: center">Li Bo, Steve Guest, Maohai Huang</p>
+<p style="text-align: center">2007-02-16</p>
+
+This package aims
+    <br />
+1) to streamline query syntax;
+    <br />
+2) to set no artificial limit on what can or cannot be queried from the user point
+    of view. Context, data, attributes, and anything with an iterator should be queried;
+    <br />
+3) to make it possible to optimize query by the pool.
+
+<h2>1. Query Syntax Simplification</h2>
 <h3>1.1 Syntax simplification</h3>
-The query API should allow simple, non-cluttered syntax to be executed. e.g.
-<pre>q=MetaQuery(Product,"p","p.instrument=='SPIRE'") </pre>
-converting to: 
+The query API should allow simple, non-cluttered syntax to be executed.<br />
+e.g.
+<pre> q=MetaQuery(Product,"p","p.instrument=='SPIRE'") </pre>
+can be simplified to:
 <pre>q=Query("instrument=='SPIRE'") </pre>
-<p>If we're clever we might be able to get this to work as well: 
-</p>
-<pre>q=Query("instrument='SPIRE'")</pre>
 
-Another example, queried on specified objects:
-<pre>
-query = FullQuery (SpectrometerDetectorSpectrum, "s", "s[A1][flux].data > 0.01") 
-</pre> 
-converting to: 
-<pre>
-query = Query (SpectrometerDetectorSpectrum, "[A1][flux].data > 0.01") 
-</pre>
-
-<h3>1.2 Expand query automaticly when query by metadata</h3>
-[SCR-2358]: PAL has a feature such if you do a query by metadata such as: <br>
-<pre>MetaQuery(Product,'rp1',"rp1.meta['Name'].value=='Product1'") </pre>
-works if all the product in the storage has a metadata called Name but it will raise 
-an error if there is as least one without it. To make the query works you have to 
-check if the metadata exist first using the following syntax: <br>
-<pre>MetaQuery(Product,'rp1',"rp1.meta.containsKey('Name') and rp1.meta['Name'].value =='Product1'")</pre>
-
-Then the requirement is:
-<br>
-When query by metadata, the query could be expanded automaticly to 
-<pre>(p.meta.containsKey('Name') and ( ... )</pre>
-
-<h2>2. Execution optimization</h2>
-<h3>2.1 Automatically choosing proper query type, e.g. FullQuery, MetaQuery and AttribQuery </h3>
-For example:
-<pre>query = Query ("instrument='Foo' and width>=200 ")</pre> converting to: 
-<pre>query = MetaQuery ("Product","p","p.instrument=='Foo' and p.width>=200") </pre>
-If only the instrument was present it would be an AttribQuery.
- <br>
-If we know something's not an attribute, assume 
-it's metadata, unless the syntax indicates otherwise, eg: <br>
+Here is another example, queried on specified objects:
+<pre>query = FullQuery (SpectrometerDetectorSpectrum, "s", "s[A1][flux].data > 0.01") </pre>
+is converted to
 <pre>query = Query (SpectrometerDetectorSpectrum, "[A1][flux].data > 0.01") </pre>
-translates to a FullQuery searching dataset A1, column 
-"flux" . <br>
-<h3>
-2.2 If part of a query is formed with standard product attributes and scalar(s) 
-(or variables of scalar values), pass this part of the query to the pool to 
-optimise it (or somehow delegate the query to the pool's internal optimizer?) and 
-query the collection of products returned by the pool 
-</h3>
-<pre>query("instrument == 'SPIRE' <strong>and</strong> xxxx")</pre> converting to: <br>
-<pre>a) AttribQuery('p.instrument == 'SPIRE')</pre>
-<pre>b) query('xxxx') on the result of step a) </pre>
-Note:
-<pre>query("instrument == 'SPIRE' <strong>or</strong> xxxx")</pre>
 
-can't be done the same way. The optimisation is no longer possible.
+<h3>1.2 Automatically Choosing Query Type</h3>
+Now FullQuery, MetaQuery and AttribQuery can be chosen automatically for the user. For example:
+<pre>query = Query ("instrument='Foo' and width>=200 ")</pre>
+is internally converted to: 
+<pre>query = MetaQuery ("Product","p","p.meta.containsKey('width') and instrument ='Foo'and p.meta['width'].value >=200") </pre>
+If only “instrument” was present it would be an AttribQuery. If the query parameter name is not associated with an attribute it is assumed to be a metadata name.
 
-<h2>3. Adaptability expanding</h2>
-There should be no artificial limit on what can and cannot be queried from the user 
-point of view. Context, data, attributes, and anything with an iterator should be 
-queried.
-<h2>4. JIDE session namespace awareness </h2>
-User defined viriables and functions in the JIDE session could be used in query.
-For Example: 
-<pre>
-b=4
+<h2>2. Unification of Metadata Query</h2>
+<h3>2.1 Unified Metadata Query Syntax</h3>
+Metadata can be queried in the same way as other types of query. For example
+<pre>result = Query(“foo > 2.3”)</pre>
+will work no matter if “foo” is an attribute or a metadata item of the Products being queried.
+    <br />
+    <br />
+    <span style="color: #ff0033">(Currently &nbsp;it will be converted to: p.meta.containsKey('foo')
+        and p.meta['foo'].value &gt;2.3 , I think we can not check if it is an attribute
+        unless we check all of the subclasses of Product which seems impossible, so it is
+        assumed to be an metadata name )</span><br />
+    <br />
+<h3>2.2 Robust handling of metadata</h3>
+In the above example if the Product does not have metadata named “foo”, 
+by default the user will get a complaint. 
+This can be overridden by setting property xxxx.ignore-no-meta to ‘false’, 
+in which case non-existent meta data appearing the query will be quietly ignored.
+    <br />
+    <span style="color: #ff0033">(The configurable api is ready, but I didn't integrate
+        it with &nbsp;HCSS Configuration mechanism to avoid extra configuration steps to
+        run the demo )</span><br />
+    <br />
+<h2>3. JIDE session namespace awareness </h2>
+User defined variables and functions in the JIDE session could be used in query. For Example:
+<pre> 
 #dummy user defined function
-def sumABB(a,b):
-	return a+b+b
+def sum(a,c):
+	return a+c
 
 #query with user defined function
-query=Query("type=='AbcProduct' and creator=='Scott' and sumABB(a, b)<0")
+a=3
+c=4
+query=Query("type=='AbcProduct' and creator=='Scott' and sum(a, c)>0")
 #query.where will be converted to: 
-#  p.type=='AbcProduct'and p.creator=='Scott'and 
-#    sumABB(p.a ,b )<0
+#  p.type =='AbcProduct'and p.creator =='Scott'and sum (a , c)>0 
 print query.where
+#queryType is AttribQuery
+print query.queryType
 results=store.select(query);
+print results
 </pre>
-<h2>5. Others</h2>
+
+<h2>4. Nonfunctional Requirements</h2> 
 Minimize or avoid changing existing classes.
+<h2>5. Features not Yet implemented</h2>
+
+<h3>5.1. Execution Optimization</h3>
+If a query has “and” and “or” Boolean operands, and certain part of the query is formed with standard product attributes and scalar(s), or variables of scalar values, such part of the query is passed to the pool to optimize, using specialized query such as AttribQuery(). The collection of products returned by the pool will be used to complete full expression evalueation.
+For example:
+<pre>query("instrument == 'SPIRE' and xxxx")</pre>
+
+is converted to
+a) AttribQuery('p.instrument == 'SPIRE')
+b) query('xxxx') on the result of step a) 
+
+<pre>query("instrument == 'SPIRE' or xxxx")</pre>
+cannot be done the same way. The optimisation is no longer possible. 
+
+<h3>5.2 Attributes of Attributes</h3>
+    Query = Query(“foo.bar >= 4”)
+where foo is an attribute.
+    <br />
+    <br />
+    <span style="color: #ff0033">("['mytable'].value&gt;=4" is OK, however “foo.bar &gt;=
+        4”still has trouble.)</span><br />
+    <br />
+
+<h3>5.3 Adaptability expanding</h3>
+To set no artificial limit on what can or cannot be queried from the user point of view. Context, data, attributes, and anything with an iterator should be queried;
 
 </body>
-
 </html>

@@ -2,6 +2,7 @@ package herschel.ia.pal.query.parser;
 
 import herschel.ia.jconsole.api.JIDEUtilities;
 import herschel.share.interpreter.InterpreterFactory;
+import herschel.share.util.Configuration;
 
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
@@ -32,11 +33,18 @@ public class PALParser {
 
 	private String _queryType;
 	
-	
+	/**
+	 * get query type, e.g. FullQuery, MetaQuery or AttribQuery
+	 * @return FullQuery, MetaQuery or AttribQuery
+	 */
 	public String getQueryType(){
 		return this._queryType;
 	}
 	
+	/**
+	 * set query type, e.g. FullQuery, MetaQuery or AttribQuery
+	 * @param queryType FullQuery, MetaQuery or AttribQuery
+	 */
 	public void setQueryType(String queryType){
 		this._queryType=queryType;
 	}
@@ -66,21 +74,18 @@ public class PALParser {
 	public String getParsedQuery() throws ParseException{
 		_jython.exec("from herschel.ia.numeric.all import *");
 		_jython.exec("from pal.parser import *");
-		_jython.set("e", _expression);
-		_jython.set("v", _var);
-		_jython.exec("g=globals()");
-		PyObject g=_jython.get("g");
-		_jython.exec("l=locals()");
-		PyObject l=_jython.get("l");
-		_jython.set("gl", g);
-		_jython.set("lo", l);
+		_jython.set("expression", _expression);
+		_jython.set("var", _var);
+		_jython.exec("globNameSpace=globals()");
+		_jython.exec("localNameSpace=locals()");
+		_jython.set("isNoFieldsIgnored", 1);
 		_jython.exec("p=parser()");
-		_jython.exec("r=p.parse(e,v,gl,lo)");
-		_jython.exec("qt=p.getQueryType()");
-		PyObject pe=_jython.get("r");
-		PyObject qt=_jython.get("qt");
-		this.setQueryType(qt.toString());
-		return pe.toString();
+		_jython.exec("parsedQuery=p.parse(expression,var,globNameSpace,localNameSpace,isNoFieldsIgnored)");
+		_jython.exec("queryType=p.getQueryType()");
+		PyObject parsedQuery=_jython.get("parsedQuery");
+		PyObject queryType=_jython.get("queryType");
+		this.setQueryType(queryType.toString());
+		return parsedQuery.toString();
 	}
 	
 	

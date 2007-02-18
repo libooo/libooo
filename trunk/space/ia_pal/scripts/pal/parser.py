@@ -19,7 +19,7 @@ class parser:
 		return self.queryType
 	def tokeater(self,toknum,tokval,spos,epos,line):
 		self.toks.append((toknum,tokval,spos,epos,line))	
-	def parse(self,queryStr,var='p',globNameSpace=globals(),localNameSpace=locals(),isNoFieldsIgnored=1):
+	def parse(self,queryStr,var='p',globNameSpace=globals(),localNameSpace=locals(),isNonExistFieldsIgnored=1):
 		self.toks=[]	
 		tokenize(StringIO(queryStr).readline,self.tokeater)
 		tokens = self.toks
@@ -49,7 +49,7 @@ class parser:
 			formerTokval=tokval
 			formerToknum=toknum
 			result.append((toknum, tokval))
-            	if isNoFieldsIgnored:
+            	if isNonExistFieldsIgnored:
                 	parsedQuery = metaContainsClause+datasetContainsClause+untokenize(result)
             	else:
                 	parsedQuery = untokenize(result)

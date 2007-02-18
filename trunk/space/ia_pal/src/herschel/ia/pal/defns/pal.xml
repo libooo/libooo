@@ -1,10 +1,10 @@
 <propconfig>
   <tab>
-      <tabname>Lstore</tabname>
+      <tabname>PAL</tabname>
       <property>
           <fieldtype>menufield</fieldtype>
-          <label>isNoFieldsIgnored</label>
-          <outputname>hcss.ia.pal.query.isNonExistFieldsIgnored</outputname>
+          <label>isQuiet</label>
+          <outputname>hcss.ia.pal.query.isQuiet</outputname>
           <tooltip>Controls whether non-existent meta data or attributes appearing the query will be quietly ignored.</tooltip>
           <default>true</default>
           <menuvalue>true</menuvalue>

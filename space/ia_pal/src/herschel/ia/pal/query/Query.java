@@ -40,8 +40,8 @@ public class Query implements StorageQuery {
 
 	private String _queryType;
 
-	private boolean isNonExistFieldsIgnored = Configuration
-	.getBoolean("hcss.ia.pal.query.isNonExistFieldsIgnored");
+	private boolean isQuiet = Configuration
+	.getBoolean("hcss.ia.pal.query.isQuiet");
 
 	public String getQueryType() {
 		return this._queryType;
@@ -53,7 +53,7 @@ public class Query implements StorageQuery {
 
 	private void parse() {
 		PALParser p = new PALParser(_variable, _expression,
-				isNonExistFieldsIgnored());
+				isQuiet());
 		try {
 			setWhere(p.getParsedQuery());
 			setQueryType(p.getQueryType());
@@ -181,8 +181,8 @@ public class Query implements StorageQuery {
 	 * @return true if non-existent meta data or attributes appearing the query
 	 *         will be quietly ignored
 	 */
-	public boolean isNonExistFieldsIgnored() {
-		return isNonExistFieldsIgnored;
+	public boolean isQuiet() {
+		return isQuiet;
 	}
 
 	/**
@@ -191,7 +191,7 @@ public class Query implements StorageQuery {
 	 * 
 	 * @param isNonExistFieldsIgnored
 	 */
-	public void setNonExistFieldsIgnored(boolean isNonExistFieldsIgnored) {
-		this.isNonExistFieldsIgnored = isNonExistFieldsIgnored;
+	public void setQuiet(boolean isQuiet) {
+		this.isQuiet = isQuiet;
 	}
 }

@@ -1,0 +1,29 @@
+<propconfig>
+  <tab>
+      <tabname>Lstore</tabname>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Implementation class</label>
+          <outputname>hcss.ia.pal.pool.lstore.imp</outputname>
+          <tooltip>Local Store implementation class</tooltip>
+          <default>herschel.ia.pal.pool.lstore.FitsProductPool</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Data directory</label>
+          <outputname>hcss.ia.pal.pool.lstore.dir</outputname>
+          <tooltip>Location of Local Store data files</tooltip>
+          <default>${user.home}/.hcss/lstore/</default>
+      </property>
+      <property>
+          <fieldtype>menufield</fieldtype>
+          <label>Deep search</label>
+          <outputname>hcss.ia.pal.pool.lstore.search.deep</outputname>
+          <tooltip>Controls whether sub-classes of specified type are included in a query.</tooltip>
+          <default>true</default>
+          <menuvalue>true</menuvalue>
+          <menuvalue>false</menuvalue>
+          <validationtype>Boolean</validationtype>
+      </property>
+  </tab>
+ </propconfig>

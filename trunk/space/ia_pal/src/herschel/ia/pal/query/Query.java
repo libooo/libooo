@@ -5,6 +5,7 @@ import herschel.ia.pal.ProductRef;
 import herschel.ia.pal.ProductStorage;
 import herschel.ia.pal.query.parser.PALParser;
 import herschel.ia.pal.query.parser.ParseException;
+import herschel.share.util.Configuration;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -13,7 +14,8 @@ import java.util.Set;
 /**
  * The main interface for PAL query. It intends to "allow simple, non-cluttered
  * syntax to be executed". Proper query types, e.g. FullQuery, MetaQuery or
- * AttribQuery will be determinded by the properties used in query in the future.
+ * AttribQuery will be determinded by the properties used in query in the
+ * future.
  * 
  * @jexample Example of an query: q=Query("type=='AbcProduct' and
  *           creator=='Scott'")
@@ -33,21 +35,25 @@ public class Query implements StorageQuery {
 	private String _where;
 
 	private String _variable;
-	
+
 	private String _expression;
+
 	private String _queryType;
-	
-	
-	public String getQueryType(){
+
+	private boolean isNonExistFieldsIgnored = Configuration
+	.getBoolean("hcss.ia.pal.query.isNonExistFieldsIgnored");
+
+	public String getQueryType() {
 		return this._queryType;
 	}
-	
-	public void setQueryType(String queryType){
-		this._queryType=queryType;
+
+	public void setQueryType(String queryType) {
+		this._queryType = queryType;
 	}
 
-	private void parse(){
-		PALParser p = new PALParser(_variable, _expression);
+	private void parse() {
+		PALParser p = new PALParser(_variable, _expression,
+				isNonExistFieldsIgnored());
 		try {
 			setWhere(p.getParsedQuery());
 			setQueryType(p.getQueryType());
@@ -55,6 +61,7 @@ public class Query implements StorageQuery {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * Query all products with the given expression. This automatically assigns
 	 * a query "variable" and selects the correct Attrib, Meta, or Full query.
@@ -63,7 +70,7 @@ public class Query implements StorageQuery {
 		_product = Product.class;
 		_variable = "p";
 		_expression = expression;
-		parse();
+		
 	}
 
 	/**
@@ -75,7 +82,7 @@ public class Query implements StorageQuery {
 		_product = c;
 		_variable = "c";
 		_expression = expression;
-		parse();
+
 	}
 
 	/**
@@ -87,7 +94,7 @@ public class Query implements StorageQuery {
 		_product = c;
 		_variable = variable;
 		_expression = expression;
-		parse();
+
 	}
 
 	/**
@@ -117,21 +124,20 @@ public class Query implements StorageQuery {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see herschel.ia.pal.query.StorageQuery#accept(herschel.ia.pal.query.StorageQueryVisitor)
 	 */
 	public void accept(StorageQueryVisitor visitor) throws IOException,
 			GeneralSecurityException {
-		if(this.getQueryType().equalsIgnoreCase("AttribQuery")){
+		if (this.getQueryType().equalsIgnoreCase("AttribQuery")) {
 			AttribQuery query;
 			query = new AttribQuery(_product, _variable, _where);
 			visitor.visit(query);
-		}
-		else if(this.getQueryType().equalsIgnoreCase("MetaQuery")){
+		} else if (this.getQueryType().equalsIgnoreCase("MetaQuery")) {
 			MetaQuery query;
 			query = new MetaQuery(_product, _variable, _where);
 			visitor.visit(query);
-		}
-		else{
+		} else {
 			FullQuery query;
 			query = new FullQuery(_product, _variable, _where);
 			visitor.visit(query);
@@ -140,6 +146,7 @@ public class Query implements StorageQuery {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see herschel.ia.pal.query.StorageQuery#getType()
 	 */
 	public Class getType() {
@@ -148,6 +155,7 @@ public class Query implements StorageQuery {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see herschel.ia.pal.query.StorageQuery#getVariable()
 	 */
 	public String getVariable() {
@@ -156,13 +164,34 @@ public class Query implements StorageQuery {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see herschel.ia.pal.query.StorageQuery#getWhere()
 	 */
 	public String getWhere() {
+		parse();
 		return _where;
 	}
-	
-	public void setWhere(String where){
-		this._where=where;
+
+	public void setWhere(String where) {
+		this._where = where;
+	}
+
+	/**
+	 * 
+	 * @return true if non-existent meta data or attributes appearing the query
+	 *         will be quietly ignored
+	 */
+	public boolean isNonExistFieldsIgnored() {
+		return isNonExistFieldsIgnored;
+	}
+
+	/**
+	 * Controls whether non-existent meta data or attributes appearing the query
+	 * will be quietly ignored.
+	 * 
+	 * @param isNonExistFieldsIgnored
+	 */
+	public void setNonExistFieldsIgnored(boolean isNonExistFieldsIgnored) {
+		this.isNonExistFieldsIgnored = isNonExistFieldsIgnored;
 	}
 }

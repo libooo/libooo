@@ -33,7 +33,7 @@ public class PALParser {
 
 	private String _queryType;
 	
-	private boolean _isNonExistFieldsIgnored;
+	private boolean _isQuiet;
 	/**
 	 * get query type, e.g. FullQuery, MetaQuery or AttribQuery
 	 * @return FullQuery, MetaQuery or AttribQuery
@@ -55,11 +55,11 @@ public class PALParser {
 	 * @param var query "variable", e.g. "p"
 	 * @param expression simplified query expression, e.g. "instrument=='SPIRE' and ABS(a-b)>5"
 	 */
-	public PALParser( String var, String expression, boolean isNonExistFieldsIgnored) {
+	public PALParser( String var, String expression, boolean isQuiet) {
 		
 		this._expression=expression;
 		this._var=var;
-		this._isNonExistFieldsIgnored = isNonExistFieldsIgnored;
+		this._isQuiet = isQuiet;
 		
 		_jython = JIDEUtilities.getCallingInterpreter();
 		if (_jython == null) {
@@ -80,13 +80,13 @@ public class PALParser {
 		_jython.set("var", _var);
 		_jython.exec("globNameSpace=globals()");
 		_jython.exec("localNameSpace=locals()");
-		if(_isNonExistFieldsIgnored){
-			_jython.set("isNonExistFieldsIgnored", 1);
+		if(_isQuiet){
+			_jython.set("isQuiet", 1);
 		}else{
-			_jython.set("isNonExistFieldsIgnored", 0);
+			_jython.set("isQuiet", 0);
 		}
 		_jython.exec("p=parser()");
-		_jython.exec("parsedQuery=p.parse(expression,var,globNameSpace,localNameSpace,isNonExistFieldsIgnored)");
+		_jython.exec("parsedQuery=p.parse(expression,var,globNameSpace,localNameSpace,isQuiet)");
 		_jython.exec("queryType=p.getQueryType()");
 		PyObject parsedQuery=_jython.get("parsedQuery");
 		PyObject queryType=_jython.get("queryType");

@@ -1,3 +1,6 @@
+#$Id: pal_api_demo.py,v 1.3 2007/03/01 13:45:15 bli Exp $
+#Copyright (c) 2006 NAOC
+#
 # This is a demo script to show how the new PAL API works. 
 
 # @author libo@bao.ac.cn
@@ -26,7 +29,7 @@ print store.save(p);
 
 # new Query API
 from pal.parser import *
-query = Query ("instrument=='Foo' and width>=200 ")
+query = Query ("instrument=='foo' and width>=200 ")
 # User could specify whether non-existent meta data or attributes appearing in the query should be
 # quietly ignored by configuring hcss.ia.pal.query.isQuiet in herschel\ia\pal\defns\pal.xml. The default
 # value is true. The converted result as shown by query.where will be: 
@@ -36,7 +39,7 @@ print query.where
 # if the hcss.ia.pal.query.isQuiet is set to false
 query.setQuiet(0)
 # the query will be converted to simplly
-#  instrument ='Foo'and p.meta['width'].value >=200
+#  instrument ='foo'and p.meta['width'].value >=200
 print query.where
 
 #queryType is MetaQuery
@@ -75,3 +78,49 @@ print query.where
 print query.queryType
 results=store.select(query);
 print results
+
+#query context
+lc = ListContext();
+foo = Product("foo");
+bar = Product("bar");
+mc = MapContext();
+foo2 = Product("foo2");
+bar2 = Product("bar2");
+mc.getRefs().put("foo", ProductRef(foo2));
+mc.getRefs().put("bar", ProductRef(bar2));
+lc.getRefs().add(ProductRef(foo));
+lc.getRefs().add(ProductRef(bar));
+lc.getRefs().add(ProductRef(mc));
+q = Query("1==1");
+r=q.match(lc)
+for item in r:
+    print item.product
+    pass
+
+#query iterator
+from java.util import *
+map=HashMap()
+foo=Product()
+foo.creator='foo'
+foo.description='foo'
+map.put("foo", ProductRef(foo))
+bar=Product()
+bar.creator='bar'
+bar.description='bar'
+map.put("bar", ProductRef(bar))
+q = Query("creator=='foo'");
+r=q.match( map.values().iterator())
+for item in r:
+    print item.product
+    pass
+
+#query Iterable
+iter = ArrayList()
+iter.add(ProductRef(foo))
+iter.add(ProductRef(bar))
+q = Query("creator=='bar'");
+r=q.match(iter)
+for item in r:
+    print item.product
+    pass
+

@@ -1,3 +1,7 @@
+#$Id: parser.py,v 1.3 2007/03/01 13:47:25 bli Exp $
+#Copyright (c) 2006 NAOC
+#
+
 from pal.tokenize import *
 from pal.StringIO import *
 from herschel.ia.dataset import Product

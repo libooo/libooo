@@ -1,3 +1,6 @@
+/* $Id: PALParser.java,v 1.3 2007/03/01 13:43:06 bli Exp $
+ * Copyright (c) 2006 NAOC
+ */
 package herschel.ia.pal.query.parser;
 
 import herschel.ia.jconsole.api.JIDEUtilities;
@@ -8,20 +11,23 @@ import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
 /**
- * Add query "variable" to the simplified query expression, e.g.<br>
- * "instrument=='SPIRE' and ABS(a-b)>5" was convert to "p.instrument=='SPIRE' and ABS(a-b)>5"
+ * Parser to parse the simplified query expression to the original pal query expression.
+ * e.g.<br>
+ *  "instrument=='foo' and width>=200 " 
+ *  was convert to 
+ *  "p.meta.containsKey('width') and (instrument =='foo'and p.meta['width'].value >=200)" by default.
  * 
- * <p>The strategy is:
- * <li>parse expression to tokens</li>
- * <li>check token if it is keyword, in globals() or in locals()</li>
- * <li>if not, add "variable" </li>
- * <p> Parser fragment:
- * <pre>
-			if toknum == NAME:
-					if not(pal.keyword.iskeyword(tokval) or gl.has_key(tokval) or lo.has_key(tokval)):
-							tokval=v+'.'+ tokval 
-   </pre>
- * <p>
+ * <br>
+ * User could specify whether non-existent meta data or attributes appearing in the query should be
+ * quietly ignored by configuring hcss.ia.pal.query.isQuiet in herschel\ia\pal\defns\pal.xml. The default
+ * value is true. 
+ * If the hcss.ia.pal.query.isQuiet is set to false
+ * the query will be converted to simplly
+ *  "instrument ='foo'and p.meta['width'].value >=200"
+ * 
+ * <br>
+ * Also the parser could give out the proper query type to run the query by scanning 
+ * the properties appeared in the query.
  * 
  * @author libo@bao.ac.cn
  */
@@ -74,7 +80,7 @@ public class PALParser {
 	 * @throws ParseException
 	 */
 	public String getParsedQuery() throws ParseException{
-		_jython.exec("from herschel.ia.numeric.all import *");
+		_jython.exec("from herschel.ia.numeric import *");
 		_jython.exec("from pal.parser import *");
 		_jython.set("expression", _expression);
 		_jython.set("var", _var);
@@ -85,9 +91,9 @@ public class PALParser {
 		}else{
 			_jython.set("isQuiet", 0);
 		}
-		_jython.exec("p=parser()");
-		_jython.exec("parsedQuery=p.parse(expression,var,globNameSpace,localNameSpace,isQuiet)");
-		_jython.exec("queryType=p.getQueryType()");
+		_jython.exec("_palParser=parser()");
+		_jython.exec("parsedQuery=_palParser.parse(expression,var,globNameSpace,localNameSpace,isQuiet)");
+		_jython.exec("queryType=_palParser.getQueryType()");
 		PyObject parsedQuery=_jython.get("parsedQuery");
 		PyObject queryType=_jython.get("queryType");
 		this.setQueryType(queryType.toString());

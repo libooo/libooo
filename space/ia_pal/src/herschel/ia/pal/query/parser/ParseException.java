@@ -1,3 +1,6 @@
+/* $Id: ParseException.java,v 1.3 2007/03/01 13:40:18 bli Exp $
+ * Copyright (c) 2006 NAOC
+ */
 package herschel.ia.pal.query.parser;
 
 /**

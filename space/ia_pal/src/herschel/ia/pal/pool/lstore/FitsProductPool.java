@@ -1,4 +1,4 @@
-/* $Id: FitsProductPool.java,v 1.9 2006/12/09 15:22:46 bli Exp $
+/* $Id: FitsProductPool.java,v 1.1 2007/02/18 14:45:36 bli Exp $
  * Copyright (c) 2006 NAOC
  */
 
@@ -25,6 +25,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +44,7 @@ import org.python.util.PythonInterpreter;
  * 
  * @author libo@bao.ac.cn
  */
-class FitsProductPool implements LocalStore, StorageQueryVisitor {
+public class FitsProductPool implements LocalStore, StorageQueryVisitor {
 
 	private final static Logger logger = Logger.getLogger("FitsProductPool");
 
@@ -69,11 +70,11 @@ class FitsProductPool implements LocalStore, StorageQueryVisitor {
 
 		if (_jython == null) {
 
-			//			Properties jyProp = new Properties();
-			//			jyProp.setProperty("python.security.respectJavaAccessibility",
-			//					"false");
-			//			Properties sysProp = (Properties) System.getProperties().clone();
-			//			PythonInterpreter.initialize(sysProp, jyProp, new String[0]);
+			// Properties jyProp = new Properties();
+			// jyProp.setProperty("python.security.respectJavaAccessibility",
+			// "false");
+			// Properties sysProp = (Properties) System.getProperties().clone();
+			// PythonInterpreter.initialize(sysProp, jyProp, new String[0]);
 
 			PySystemState.initialize();
 			_jython = new PythonInterpreter();
@@ -194,13 +195,15 @@ class FitsProductPool implements LocalStore, StorageQueryVisitor {
 			if (dataFile.exists()) {
 				throw new IOException("File '" + dataFile.getName() + "' in "
 						+ directory + " already exist. ");
-			}			
+			}
 			FitsArchive fa = new FitsArchive();
 			try {
 				fa.save(dataFile.getAbsolutePath(), product);
 			} catch (IOException e) {
-				IOException ioe = new IOException("Failed to save product using FitsArchive. File:"
-						+ dataFile.getAbsolutePath() + " URN: " + urn +" "+ e.getMessage());
+				IOException ioe = new IOException(
+						"Failed to save product using FitsArchive. File:"
+								+ dataFile.getAbsolutePath() + " URN: " + urn
+								+ " " + e.getMessage());
 				ioe.initCause(e);
 				throw ioe;
 			}
@@ -214,8 +217,9 @@ class FitsProductPool implements LocalStore, StorageQueryVisitor {
 			raf.close();
 			saveAttributes(product, urn);
 		} catch (IOException e) {
-			IOException ioe = new IOException("Failed to save product index file. " 
-					+" urn: " + urn + " "+ e.getMessage());
+			IOException ioe = new IOException(
+					"Failed to save product index file. " + " urn: " + urn
+							+ " " + e.getMessage());
 			ioe.initCause(e);
 			throw ioe;
 		}

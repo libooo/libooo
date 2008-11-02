@@ -1,0 +1,21 @@
+$Id: CHANGELOG,v 1.3 2007/11/13 15:37:32 bli Exp $ 
+
+CHANGELOG
+
+PRIVATE_IA_PAL_QUERY_1_2 (2007-11-13) [Bli]
+--------------------------------
+1. 	Clear the testing pool before using it(temporary work around) 
+	Files modified: 
+		* PalApiTest.py
+
+PRIVATE_IA_PAL_QUERY_1_1 (2007-07-08) [Bli]
+--------------------------------
+1. 	Bugfix: SPR-3360
+	Files modified: 
+		* herschel.ia.pal.query.Query 
+		* PalApiTest.py
+2.  Remove the dependency to herschel.ia.jconsole.api.JIDEUtilities
+	in herschel.ia.pal.query.parser.PalParser, reference to
+	herschel.share.interpreter.InterpreterUtil instead.
+	File modified:
+		* herschel.ia.pal.query.parser.PalParser

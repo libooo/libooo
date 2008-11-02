@@ -1,0 +1,39 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.&nbsp;ProductStorage and ProductPools</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-design.html" title="Product Access Layer Design"><link rel="up" href="pal-design.html" title="Product Access Layer Design"><link rel="prev" href="ar01s03.html" title="3.&nbsp;Design principles"><link rel="next" href="ar01s05.html" title="5.&nbsp;Contexts"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">4.&nbsp;ProductStorage and ProductPools</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s03.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="storage-pools"></a>4.&nbsp;ProductStorage and ProductPools</h2></div></div></div><p>
+In the PAL, Products can be stored in a number of different storage areas, for example, in a users local file system, in a database, or across the network. Each different storage area is considered in the PAL design as a 'ProductPool'.
+
+The essential design points for a ProductPool is as follows:
+</p><p>
+<div class="itemizedlist"><ul type="disc"><li><p>Products that are saved in a ProductPool are recoverable by a unique string ID. 
+This string ID is a Uniform Resource Locator or URN.</p></li><li><p>Products saved are always allocated a new URN - they never re-use a URN
+of a previously saved Product (unless that previously saved Product is deleted).</p></li><li><p>Products saved are never subsequently modified; instead a new Product with a new URN is saved
+(although for users accessing data through a ProductStorage instance, the design does not prevent Products from being <span class="emphasis"><em>perceived</em></span> as being modified).</p></li></ul></div>
+</p><p>
+One other design consideration is how a user would access data across ProductPools. In the most general sense, users will access data across more than one ProductPool - for example, an astronomer may query for Products across the Herschel Science Archive and data stored on his own laptop. So the PAL introduced a single class - the ProductStorage - that emcompasses operations across multiple ProductPools.   
+</p><p>
+A ProductStorage acts as the single entry point for users operations; users do not access ProductPools directly.This enables the ProductStorage to take requests from users, process that request internally if necessary, and then make the appropriate calls to the appropriate ProductPool implementations.
+</p><p>
+A ProductStorage class needs visibility as to which ProductPools it is supposed to handle, so the user 'registers' ProductPools to the ProductStorage instance.
+</p><p>
+It was mentioned earlier that one design principle of the PAL is lightweight access to data. 
+Products can in principle be very large in size, so pulling out a single Product from a ProductPool could result in a large memory footprint. 
+The PAL design allows users to keep a 'handle' on Products, and have access 
+to their attributes and meta-data without pulling the entire Product in memory 
+by introducing a special intermediary class called a 'ProductRef'. 
+When it comes to accessing Products, the ProductStorage and ProductPools 
+provide methods (load() and select()) that do not return the Product directly, but instead ProductRefs.
+</p><p>When the referenced product is already saved, and the ProductRef is asked for retrieving it
+through the getProduct() method, it loads and returns the product, but doesn't keep it in memory,
+unless the product is a Context, in which case it's kept for further accesses. This mechanism
+saves space in memory when accessing heavyweight products.</p><p>
+A class diagram
+showing relation of the classes discussed above is provided in <a href="ar01s04.html#figure-pal-storage-pool" title="Figure&nbsp;1.&nbsp;ProductStorage, ProductPools and ProductRef class diagram.">Figure&nbsp;1, &ldquo;ProductStorage, ProductPools and ProductRef class diagram.&rdquo;</a>.
+
+<div class="figure"><a name="figure-pal-storage-pool"></a><div class="mediaobject" align="center"><img src="../images/PAL-ProductStoragePool.png" align="middle" alt="ProductStorage, ProductPools and ProductRef class diagram."></div><p class="title"><b>Figure&nbsp;1.&nbsp;ProductStorage, ProductPools and ProductRef class diagram.</b></p></div>
+</p><p>
+You can consult specific information of each kind of pool:
+<div class="itemizedlist"><ul type="disc"><li><a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/cache/index.html" target="_top">CachedPool</a></li><li><a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/db/index.html" target="_top">DbPool</a></li><li><a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/lstore/index.html" target="_top">LocalStore</a></li><li><a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/serial/index.html" target="_top">SerialPool</a></li><li><a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/simple/index.html" target="_top">SimplePool</a></li></ul></div>
+</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+New types of pools are planned to be added:
+<div class="itemizedlist"><ul type="disc"><li><span class="emphasis"><em>HttpPoolServlet</em></span> is the variant of PoolDaemon that allows remote access through HTTP.</li><li><span class="emphasis"><em>HttpClientPool</em></span> is the counterpart of SerialClientPool, to remotely connect to an HttpPoolServlet.</li><li><span class="emphasis"><em>HsaPool</em></span>, with the two versions remote and local also, will provide access to the Hershel Science Archive (HSA).</li></ul></div></td></tr></table></div>
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s03.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s05.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">3.&nbsp;Design principles&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-design.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;5.&nbsp;Contexts</td></tr></table></div></body></html>

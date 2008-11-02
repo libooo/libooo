@@ -1,0 +1,1210 @@
+<?xml version="1.0"?>
+<!DOCTYPE book SYSTEM "../../../docbook/dtd/docbookx.dtd">
+<!-- <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN"> -->
+
+<article>
+<articleinfo>
+<title>Product Access Layer Developers Guide</title>
+<date>13 August 2007</date>
+<issuenum> HERSCHEL-HSC-DOC-0840 Issue 0.4</issuenum>
+<author>
+<firstname>Hassan</firstname><surname>Siddiqui</surname>
+</author>
+</articleinfo>
+
+<section id="doc-spec">
+<title>Document Information</title>
+<para>
+<itemizedlist>
+<listitem><para>DOC ID: HERSCHEL-HSC-DOC-0840</para></listitem>
+<listitem><para>Issue: 0.5</para></listitem>
+<listitem><para>Date: 05 Sep 2007</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section id="quick-start">
+<title>Quick Start</title>
+<para>
+This section summarises the main points described in this document.
+This is useful for those who need a quick-start to the essentials of this document,
+and for those who are aware of most of the features of the PAL and merely need a summary
+of the major points here.
+
+<informaltable>
+
+<tgroup cols="2">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="3*"/>
+<tbody>
+
+<row>
+<entry>Product</entry>
+<entry>An instance, or subclass, of herschel.ia.dataset.Product .</entry>
+</row>
+
+
+<row>
+<entry>ProductPool</entry>
+<entry>A persistent storage repository for Products. A shortname is simply 'pool'. 
+This can be file-based, database-based, or network-based. A ProductPool can be used to represent Products 
+stored in the Herschel Science Archive (HSA), or Products stored on a user's laptop. ProductPools take care 
+of read/write and query operations on their data, and thus such operations can be optimized for different ProductPools, 
+depending on their nature (note that read/write/query operations that a user performs must go through the relevant ProductStorage instance.)
+</entry>
+</row>
+
+<row>
+<entry>ProductStorage</entry>
+<entry>This is the central class for
+reading, writing and querying Products. A shortname is simply 'storage'. 
+The ProductStorage performs its operations on one or many ProductPools
+that are 'registered' to it (the ProductStorage instance takes responsibility in delegating such operations to those ProductPools). 
+With such a scheme, it is possible to perform common queries on Products across
+a number of different physical locations; for example a query involving the HSA and data on a astronomer's laptop.</entry>
+</row>
+
+<row>
+<entry>Contexts</entry>
+<entry>These are a special subclass of Product that is used used to associate or 'group' 
+other stored Products. These are lightweight Products, in the sense that they only contain references (through
+as special object called a ProductRef)
+to other Products. Because Contexts are Products, Contexts can group other Contexts, thus forming
+Context 'trees'. There are two 'standard' Contexts provided with the herschel.ia.pal package:
+MapContext and ListContext.
+<footnote><para>Note that Contexts are not used for versioning Products;
+a versioning support is addressed by a different concept that will be made
+available in the future.</para></footnote></entry>
+</row>
+
+<row>
+<entry>Context 'rules'</entry>
+<entry>These are implementations of the herschel.share.predicate.Predicate interface, 
+that determine what Products are allowed and what are not allowed to be inserted into a Context's group.
+</entry>
+</row>
+
+
+<row>
+<entry>ListContext</entry>
+<entry>A 'standard' context implementation provided with the herschel.ia.pal package. 
+A ListContext provides access to its group of Products (or more specifically, ProductRefs) 
+by (integer) index.</entry>
+</row>
+
+<row>
+<entry>MapContext</entry>
+<entry>A 'standard' context implementation provided with the herschel.ia.pal package. A MapContext provides access 
+to its group of Products (or more specifically, ProductRefs) by a (String) key.</entry>
+</row>
+
+<row>
+<entry>ProductRef</entry>
+<entry>This is a special lightweight object that provides a reference to a Product that is situated either
+in memory, or saved persistently. If the latter, the ProductRef will contain the URN to that Product.
+A ProductRef will provide access to the attributes and meta-data of that Product,
+and indirectly to the Product contents.
+</entry>
+</row>
+
+<row>
+<entry>Leaf Product</entry>
+<entry>This term refers to non-Context Products. These are the products that stores actual data. 
+As these do not reference other Products
+as do Contexts, in a Context 'tree' of associations, such Products can only be the leaves of such trees.</entry>
+</row>
+
+<row>
+<entry>StorageQuery</entry>
+<entry>Queries performed on a ProductStorage instance are implementations of this interface.</entry>
+</row>
+
+<row>
+<entry>AttribQuery</entry>
+<entry>An implementation of StorageQuery that queries on one or more attributes of Products available
+from the relevant ProductStorage. This is a special type as it allows a ProductPool implementation to optimize such attribute query operations.</entry>
+</row>
+
+<row>
+<entry>MetaQuery</entry>
+<entry>An implementation of StorageQuery that queries on one or more meta-data attributes of Products available
+from the relevant ProductStorage. This is a special type as it allows a ProductPool implementation to optimize on such query operations.</entry>
+</row>
+
+<row>
+<entry>FullQuery</entry>
+<entry>An implementation of StorageQuery that performs a general query that could involve attributes, meta-data, 
+or the actual Product data contents, or a mixture.</entry>
+</row>
+
+</tbody></tgroup>
+</informaltable>
+
+</para>
+</section>
+
+<section id="introduction">
+<title>Introduction</title>
+<para>
+This guide is intended:
+
+<itemizedlist>
+<listitem><para>To document the design of the PAL to aid developers of the PAL in future development and maintainence of the code.</para></listitem>
+<listitem><para>To provide guidelines to developers using the PAL API, eg those implementing ProductPools (<xref linkend="storage" />), 
+and those who want to design complex persistent data structures
+for their users.</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+This document is intended to complement the information provided for the general user (astronomer or calibration scientist), 
+in the DP User's Manual <ulink url="ftp://ftp.rssd.esa.int/pub/HERSCHEL/csdt/releases/doc/ia/document/um/html/ch12s02.html"> Chapter 12.2</ulink>.
+It is strongly recommended to read that information first before reading this document.
+</para>
+</section>
+
+<section id="pal">
+<title>What is the PAL?</title>
+<para>The Product Access Layer (PAL) provides a 
+implementation-independent interface for astronomers, 
+calibration scientists and developers alike to read, 
+write and save products to persistent storage locations.
+</para>
+<para>
+The persistent storage locations (ProductPools) can be file-based, 
+database-based or network-based. 
+A set of standard pool implementations are 
+available as part of the herschel.pal package, 
+and during the process of development will be extended. 
+But these pools are not the only ones that need be available. 
+Of course, any developer who wishes to write his/her own pool can do so - they need only implement the ProductPool API and follow the rules listed in <xref linkend="rules" />.
+</para>
+</section>
+
+<section id="walk-through">
+<title>Walk-through</title>
+<para>
+This section provides a brief overview of the major components
+of the PAL. Most of the components
+are illustrated in an example set-up shown in <xref linkend = "figure-pal-design" />.
+
+<figure id="figure-pal-design"><title>Illustration of PAL components and their usage.</title>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="../images/PAL-design.jpg" format="JPG"/></imageobject>
+</mediaobject>
+</figure>
+
+</para>
+
+<para>
+Starting from the left we have a ProductStorage instance. 
+This is <emphasis>the</emphasis> object end-users and developers 
+alike will use to read, write, and search for products. 
+The ProductStorage instance accesses data from one or many ProductPools that
+are registered with the ProductStorage instance. 
+</para>
+
+<para>
+ProductPools are the storage repositories for products. They can have many forms:
+file-based, database-based, network-based, and so forth.
+</para>
+
+<para>
+Within a pool, products can be grouped together to form associations. 
+A special type of Product - a Context - provides for such associations. 
+</para>
+
+<para>
+There are two standard implementations of Context available for developers:
+ListContext and MapContext. ListContexts provide access to the products they associate by an (integer) index, while a MapContext provides access to it's child products by a (String) key. 
+</para>
+
+<para>
+As Contexts themselves are Products, contexts can be referenced from other contexts (in the example, the ListContext is referenced from a MapContext). This can allow, for example, complex hierarchies
+of associations to be formed.
+</para>
+
+<para>
+It is possible that Contexts present in one ProductPool can reference other products
+in other pools (in the example, the ListContext references final product 'Y' in a separate pool).
+</para>
+
+
+<para>
+Contexts reference a product through special constructs called ProductRefs.
+These ProductRefs allow for the deferred or lazy loading and saving of Products (thus keeping the memory footprint small) and also enable references 
+to Products whose only version is at that current time only
+available in memory, or the most recent update is currently available in memory.
+(This fairly subtle feature is discussed in more detail in 
+<xref linkend="context-tree-update" />).
+</para>
+
+<para>
+What is not shown in the diagram and completes the overview is the query support;
+it is possible to perform searches across all the pools pointed to by a ProductStorage,
+through one of three types of query objects: AttribQuery 
+(which finds matches in product attributes);
+MetaQuery (for metadata [as opposed to hard attributes]) of a product; and FullQuery
+ (for full searches across all data with a product). 
+These are discussed in more detail in section <xref linkend="query" />.
+</para>
+
+
+<para>
+Each of the major components are discussed in more detail in the following sections.
+</para>
+
+</section>
+
+<section id="storage">
+<title>Storing products: ProductStorage and ProductPool</title>
+<para>
+
+As mentioned earlier, ProductPools are the implementations for the persistent storage repositories. 
+There are currently a number of different implementations for ProductPools 
+(eg file-based such as the SimplePool and lstore implementations; or a database implementation such as the DbPool).
+</para>
+
+<para>
+The ProductStorage class provides the central interface for users
+and developers alike in terms of accessing products.
+This class is the basic storage area, and is created using <screen>storage=ProductStorage()</screen> 
+The product pools that you wish to use need to be registered to the product storage you have created. 
+More than one product pool can be registered to a specific ProductStorage.</para>
+
+<para>
+<note>
+When products are saved, they will be saved to the first pool that registered to the ProductStorage.
+</note>
+</para>
+
+<caution>
+<para>
+Developers are allowed to extend the Product class or any of its subclasses <emphasis>only in Java</emphasis>.
+Trying to save in a ProductStorage products that belong to a class defined in Jython is not supported.
+See also the developer documentation of <ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/dataset/doc/devel.html#dp.dataset.dg.SpecialDataset.javaonly">ia_dataset</ulink>.
+</para>
+</caution>
+
+<section id="productRef">
+<title>ProductRefs</title>
+
+<para>
+Sometimes what is needed during a session is to have a reference to a product, but not to have to necessarily load it into memory.
+This is important if a user needs to reference products of significantly large volumes, but only require, for example attribute information from
+each of those products.
+</para>
+<para>
+The PAL minimizes the memory footprint by introducing the notion of a ProductRef. Access to any product in the PAL
+(i.e. via the ProductStorage load() and select() methods) returns not the direct
+product or set of products, but instead ProductRef objects that have internal knowledge of that product. 
+With a ProductRef, a user is able to access the attribute data, or the meta data of a product,
+without loading the complete product in memory. Should the user need to access further information, 
+the full contents may be loaded into memory using the ProductRef.getProduct() method.
+</para>
+<para>When the referenced product is already saved, and the ProductRef is asked for retrieving it,
+it loads and returns the product, but doesn't keep it in memory, unless the product is a Context,
+in which case it's kept for further accesses. This mechanism saves space in memory when accessing
+heavyweight products.</para>
+</section>
+
+</section>
+
+
+<section id="context">
+<title>Associating Products: Contexts</title>
+
+<para>
+It is often the case that products need to be grouped, and their common grouping made persistent.
+The PAL provides for this by introducing a special Product called Context. 
+The Context class itself is an abstract subclass of Product. 
+The Context class needs to be further subclassed in order to be used.
+There are two standard Contexts provided: ListContext and MapContext
+
+A class diagram showing these classes and their relation is provided in <xref linkend="figure-context" />.
+
+<figure id="figure-context"><title>Class diagram for the classes related to Contexts</title>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="../images/PAL-Contexts.png" format="PNG"/></imageobject>
+</mediaobject>
+</figure>
+
+</para>
+
+<para>
+The standard Contexts are discussed in the next few sections.
+</para>
+
+<section id="listcontext">
+<title>ListContext: for accessing products by number</title>
+<para>
+The ListContext is a subclass of Context in which a list of references is kept. 
+The product (via its ProductRef) is obtained via its index in the list, and products can be added at a specific index in the list. 
+
+<screen>
+productRef1 = storage.save(product1)
+productRef2 = storage.save(product2)
+c = ListContext()
+c.refs.add(productRef1)
+c.refs.add(productRef2)
+print c.refs[0].urn # urn of product 1
+print c.refs[1].urn # urn of product 2
+</screen>
+
+Note that the addition operation is in fact an insertion, 
+and the previous product at the index in question and the following products in the list are shifted by one index 
+to accommodate the new product.
+Note that the ProductRefs can also refer to another context, and not just a product, 
+so that multiple contexts can be effectively linked.
+</para>
+</section>
+
+
+<section id="mapcontext">
+<title>MapContext: for accessing products by key</title>
+<para>
+The MapContext is another form of context in which the ProductRefs are accessed via a key of type String.
+When inserting a new Product (via its ProductRef) 
+into this Context, the developer should be aware if there is an existing ProductRef already at that key,
+that ProductRef will be replaced by the new ProductRef.
+
+<screen>
+productRef1 = storage.save(product1)
+productRef2 = storage.save(product2)
+c = MapContext()
+# Insert products into the MapContext
+c.refs.put('x', productRef1)
+c.refs.put('y', productRef2)
+print c.refs['x'].urn # urn of product 1
+print c.refs['y'].urn # urn of product 2
+
+# Now replace ProductRef at key 'x' with productRef3
+productRef3 = storage.save(product3)
+c.refs.put('x', productRef3)
+print c.refs['x'].urn # urn of product 3
+</screen>
+
+</para>
+</section>
+
+
+<section id="rules">
+<title>What can or cannot be added to a context - Rules</title>
+<para>
+Contexts can be constrained by having a Rule defined for products which are added - the default 
+allows any product to be added to the context. This can be defined by the user to allow, for example, 
+only a particular product sub-class to be added, or a chack to make sure that no child product already exists 
+in the context with a given metadata keyword.
+Rules are built using Predicates, and Rules can be combined together using 'and' and 'or' constructs. 
+If an attempt is made to add a product which does not conform to the rule, a ContextRuleException is thrown.
+</para>
+</section>
+
+<section id="context-tree-update">
+<title>Updating a context 'tree'</title>
+<para>
+When a context is saved (assuming that the context implementation is written correctly),
+ the changes that are made in its child contexts are automatically saved as well.
+</para>
+
+<para>
+This works as follows. The PAL facilitates this by requiring that any context should 'announce' when it has been modified in-memory - 
+or 'dirty'- by
+calling its dirty() method. Other objects needing to know if that context is modified in memory or otherwise would call the context's isDirty() method.
+</para>
+
+<para>
+In the case of a parent context, on saving the isDirty() methods of its child contexts are called. 
+If any of those calls results in false, the corresponding child context is saved:
+
+<screen>
+# Create the child context first
+c_child=MapContext()
+
+# Create an in-memory ProductRef to this child context
+productRef1=ProductRef(c_child)
+c_parent=ListContext()
+
+# Insert child into parent
+c_parent.refs.add(productRef1)
+
+storage.save(c_parent) # c_parent and c_child automatically saved
+
+# Now modify child
+c_child.creator='changed' 
+
+# Save context 
+storage.save(c_parent) # modified c_child (and c_parent) saved
+</screen>
+
+</para>
+
+<para>
+There is one issue in this design however, and that is to do with 'leaf' (non-context) products. 
+Such products do not have an isDirty() method, so it is not possible for a parent Context to 
+ascertain whether such child Product has been modified in memory or otherwise:
+
+<screen>
+leaf_child=Product()
+
+productRef1=ProductRef(leaf_child)
+c_parent=ListContext()
+
+c_parent.refs.add(productRef1)
+
+storage.save(c_parent) # c_parent and c_child automatically saved
+
+# Now modify child
+leaf_child.creator='changed'
+storage.save(c_parent) # c_parent and c_child NOT saved
+</screen>
+
+
+</para>
+
+<para>
+The safest recommendation is to <emphasis>always save leaf products 
+explicitly after every modification</emphasis>.
+</para>
+</section>
+
+<section id="tips">
+<title>Tips for using Contexts</title>
+<para>
+<itemizedlist>
+<listitem><para>Contexts are meant to be lightweight access;
+don't overload them with data.</para></listitem>
+<listitem><para>Use the standard contexts of ListContext and MapContext where necessary</para></listitem>
+<listitem><para>Try to save products/contexts as soon as possible - try not to rely on context doing this work (see <xref linkend="context-tree-update" />). 
+In future support may be more robust.</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+</section>
+
+
+<section id="cloning">
+<title>Product Cloning</title>
+<para>
+It is possible to clone a complete context tree from
+one storage to another. The operation is simple:
+</para>
+
+<para>
+<screen>
+# Get Context from first storage
+context=storage1.load("urn:123").product
+
+# Save Context to second storage 
+storage2.save(context) 
+</screen>
+</para>
+
+<para>
+The second step invokes the cloning operation.
+</para>
+
+<para>
+The cloning operation recursively clones the context tree 
+starting from the context in the argument storage.save() call (the 'head' context), 
+downwards to the terminals (contexts with no children or leaf products).
+</para>
+
+<para>
+It repeats the same operation for the older versions of the head context, but only that context.
+In other words, if there are child contexts that happen to have older versions, they are not cloned.
+</para>
+
+</section>
+
+<section id="versioning">
+<title>Product Versioning</title>
+<para>
+Different versions of a product belong to an <emphasis>edition</emphasis>,
+as in the following example:
+</para>
+
+<para>
+<screen>
+edition = Product()
+storage.save(edition) # version 0 of edition saved
+# Modify edition
+storage.save(edition) # version 1 of edition saved
+....
+</screen>
+</para>
+
+<para>
+<note>
+The product type must be constant along a version track. Changing the type of a
+product already saved, and trying to save it again, will lead to an exception.
+</note>
+</para>
+
+<para>
+To get the latest version of an edition, or the list of versions for that edition,
+you need to have available one arbitrary version of that edition.
+With that version, you can recover the latest version of that edition,
+and the list of all versions of that edition:
+</para>
+
+<para>
+<screen>
+latest=storage.getHead(productRefOfAnyVersionOfEdition)
+versions=storage.getVersions(productRefOfAnyVersionOfEdition)
+</screen>
+</para>
+
+<para>
+You can get information on the current versions of each product,
+as well as tag information, as follows:
+</para>
+
+<para>
+<screen>
+System.out.println(storage.getVersioningInfo());  // Java
+print storage.versioningInfo                      # Jython
+</screen>
+</para>
+
+<para>
+<note>
+In order to let product versioning work, pools have to be accessed always
+through a ProductStorage. So <emphasis>avoid using pools directly</emphasis>.
+</note>
+</para>
+
+<section id="versioning.querying">
+<title>Querying</title>
+<para>
+The default query is to search for just the latest versions of editions:
+</para>
+
+<para>
+<screen>
+query=AttribQuery(Product, "p", "1")
+storage.select(query) # Just the latest versions
+</screen>
+</para>
+
+<para>
+If you want to get all versions of editions that match a query,
+use the extended query constructors, setting the forth argument to true:
+</para>
+
+<para>
+<screen>
+query=AttribQuery(Product, "p", "1", 1)
+storage.select(query) # All versions of editions that match
+</screen>
+</para>
+
+<para>
+<note>
+With this extended query, the special products containing versioning
+information, VersionTrackProduct and TagsProduct, are also returned if they
+match the query.
+</note>
+</para>
+
+<para>
+<caution>
+Make sure that you use the meta.containsKey()
+checks when performing Full or Meta-data queries, as the presence of version
+products may affect those queries, or worse, result in an exception if the
+metadata being queried for is not present in any version product.
+</caution> 
+</para>
+</section>
+
+<section id="versioning.tagging">
+<title>Tagging</title>
+
+<para>To save a product with a given tag:</para>
+
+<para>
+<screen>
+storage.saveAs(myproduct, "mytag") # saves myproduct to URN=product:123, and links tag 'mytag' to that URN
+storage.load("mytag") # returns a ProductRef to product at URN=product:123
+</screen>
+</para>
+
+<para>To assign a tag to an existing product in the storage:</para>
+
+<para>
+<screen>
+storage.setTag("mytag", urn)
+</screen>
+</para>
+
+<para>You can assign multiple tags to the same product:</para>
+
+<para>
+<screen>
+storage.setTag("mytag1", urn)
+storage.setTag("mytag2", urn)
+storage.setTag("mytag3", urn)
+</screen>
+</para>
+
+<para>You can re-assign tags from one product to another:</para>
+
+<para>
+<screen>
+storage.setTag("mytag", urn1)
+storage.setTag("mytag", urn2)  # removes the tag mytag from urn1, and re-assigns it to urn2
+</screen>
+</para>
+
+<para>
+<note>
+A given tag maps to only one URN.
+</note>
+</para>
+
+<para>
+You can also remove tags from the system: 
+</para>
+
+<para>
+<screen>
+storage.removeTag("mytag")     # removes the tag, but not the product
+</screen>
+</para>
+
+<para>
+And check if a given tag exists: 
+</para>
+
+<para>
+<screen>
+print storage.tagExists("mytag")
+</screen>
+</para>
+
+</section>
+
+<section id="versioning.oldpools">
+<title> Using the new versioning mechanism against existing pools</title>
+
+<para>
+You can use the new versioning mechanism against pools with previously
+existing data. Although it is highly recommended to use the mechanism
+against new pools with no data.
+</para>
+
+<para>
+If you wish to use the mechanism against pools with existing data, be aware
+that existing products in your pool do not have versioning information.
+So if you modify such products, and then save them:
+</para>
+
+<para>
+<screen>
+p = oldstorage.load("myurn").product
+# modify p
+oldstorage.save(p)
+</screen>
+</para>
+
+<para>
+the PAL does not know what version the modified product belongs to,
+and therefore saves the modified version of the product as the first version
+of a whole new version track.
+</para>
+
+<para>
+It is therefore recommended to use the new versioning mechanism against a clean
+ProductStorage, devoid of any products, or as the next best thing, migrate your
+products to a fresh pool as follows:
+</para>
+
+<para>
+<screen>
+storage.register(newpool)
+storage.register(oldpool)
+
+p = storage.load("urn:123").product
+storage.save(p) # saves the product with versioning information, to newpool
+</screen>
+</para>
+
+<para>
+And then use the newpool for future sessions (archive or remove oldpool).
+</para>
+
+<para>
+In order to copy a whole pool, the evolvePool tool can be used.
+</para>
+
+</section>
+
+</section>
+
+<section id="evolver">
+<title>Pool evolution tool</title>
+<para>
+When all products of a pool need to be changed in some way, it can be done
+by querying all of them, and save them back, with the new changes.
+</para>
+<para>
+There is a problem though when doing this, because copying all products may
+not preserve hierarchy, or make duplicates if contexts share common leaf
+products.
+</para>
+<para>
+This problem is solved by the evolvePool tool, that copy all products from a
+pool to another, by preserving their hierarchy. This tool is located at
+herschel/ia/pal/util. Here is the synopsis:
+</para>
+<screen>
+Usage: evolvePool &lt;sourceId&gt; &lt;sourceType&gt; [&lt;targetId&gt; &lt;targetType&gt;] [&lt;copyAllVersions&gt;]
+  The sourceId and sourceType refer to the id and type of the source pool, resp. 
+  Allowed pool types are simple, db, and lstore.
+  The target pool is optional. If you don't provide a target, the source pool
+  will be updated with the evolved products, and the old products will be removed.
+  The copyAllVersions flag can be true or false; it indicates whether to copy all
+  versions of each root product, or just the last version of each root product.
+  If omitted, the default is to copy all versions of each root product.
+  A root product is any context or product not contained in other context.
+</screen>
+</section>
+
+<section id="locking">
+<title>Pool locking mechanism</title>
+<para>
+When many processes are accessing the same pool at the same time, it is
+possible to have collisions, so that one process overrides changes made by another one.
+</para>
+
+<para>
+It also may be the case that many processes are accessing the same pool, while working
+with different products, so that collisions would not be expected in principle.
+However, even in this case, if the different processes are associating tags to products,
+they are implicitly modifying the internal TagsProduct concurrently.
+</para>
+
+<para>
+In order to avoid this kind of collisions, there has been implemented a basic locking mechanism,
+at pool level.
+</para>
+
+<section id="locking.guidelines">
+<title>Guidelines for developers</title>
+
+<section id="locking.no">
+<title>Non-concurrent access to a pool</title>
+<para>The defaults will work for you.</para>
+</section>
+
+<section id="locking.tagging">
+<title>Concurrent tagging</title>
+<para>
+You need either to:
+<itemizedlist>
+<listitem>Set the property hcss.ia.pal.sharedMode to true; this is read at the start-up, or</listitem>
+<listitem>Call ProductStorage.setSharedMode(true)</listitem>
+</itemizedlist>
+<note>The shared mode flag affects all product storages in the session.</note>
+</para>
+</section>
+
+<section id="locking.products">
+<title>Concurrent access to products</title>
+<para>
+Use the acquireLock() and releaseLock() methods on the target pool.
+Within these calls, you are the only allowed to modify the pool.
+</para>
+<para>
+These calls can be nested, so that calling acquireLock() twice to a pool will
+require to call releaseLock() twice too, in order to effectively release it.
+</para>
+<para>
+<caution>
+You must call pool.releaseLock() for each pool.acquireLock().
+This can be ensured by releasing the lock inside a finally block. For example:
+<screen>
+ProductStorage storage = new ProductStorage();
+ProductPool pool = SimplePool.getInstance("somePool");
+storage.register(pool);
+
+try {
+    pool.acquireLock();
+    Product p = storage.load(someUrn);
+    // modify p...
+    storage.save(p);
+}
+finally {
+    pool.releaseLock();
+}
+</screen>
+</caution>
+</para>
+</section>
+
+</section>
+
+<section id="locking.serial">
+<title>Concurrency in serial pool</title>
+<para>
+In the current implementation of the PoolDaemon, the incoming requests are
+queued, and only one request is attended at a time. From this point of view,
+concurrency is assured for atomic operations.
+</para>
+
+<para>
+However, the same problems commented above may arise when working with a serial
+pool. So the guidelines presented before applies the same way for this pool.
+</para>
+
+<para>
+One more thing to bear in mind about the serial pool is that the PoolDaemon
+"knows" the process that acquired the lock, so that it only allows that
+particular process to release the lock.
+</para>
+</section>
+
+</section>
+
+<section id="query">
+<title>Querying for products</title>
+<para>As mentioned earlier, it is possible to query for products.
+Queries are possible through one of three types of query classes:
+The AttribQuery, the MetaQuery and the FullQuery.
+</para>
+
+<para>
+The AttributeQuery is a query mechanism that allows the user/developer to query the metadata that is defined for all products, such as: creator, creationDate, startDate, endDate, instrument, modelName.
+This follows the syntax <screen>
+AttribQuery aq = new AttribQuery(Product.class, "p", "p.creator == 'me'");
+</screen>
+This queries the products for any with the value of the attribute that is equal to 'me'. The query is used via the following syntax and returns a Set ;
+<screen>
+AttribQuery aq = new AttribQuery(Product.class, "p", "p.creator == 'me'");
+Set&lt;ProductRef&gt; results = storage.select(aq);
+</screen>
+</para>
+<para>
+The MetaQuery allows for a search on any Metadata, including those which are specified for only some classes of product. This follows the syntax 
+<screen>
+MetaQuery mq = new MetaQuery(Product.class, "p", "p.meta.containsKey('flag') and p.meta['flag'].value == 'up'");
+Set&lt;ProductRef&gt; results = storage.select(mq);
+</screen>
+Again, this returns a Set of the ProductRefs containg the value 'up' for the MetaData 'flag'.
+
+</para>
+<para>
+The FullQuery allows for a search of the data in the products, 
+and can make use of numeric functions that are defined in the basic numeric toolbox, as in this example:
+<screen>
+FullQuery fq = new FullQuery(Product.class, "p", "ANY(p['table']['Numbers'].data &lt; 50.0)");
+Set&lt;ProductRef&gt; results = storage.select(mq);
+</screen>
+</para>
+
+<section id="enhanced-query">
+<title>Enhanced Query API</title>
+
+<para>
+From DP-11/2 onwards, there is a new enhanced Query API provided in parallel with the above query support.
+Documentation for that is available under the <ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/pal/query/package-summary.html#package_description">javadoc</ulink> for the herschel.ia.pal.query package.
+</para>
+</section>
+
+</section>
+
+<section id="managers">
+<title>Storage and PoolManagers</title>
+
+<para>
+The purpose of the StorageManager and PoolManagers is to enable users and site adminstrators to provide pre-configured
+ProductStorage and ProductPool instances that can be used by the individual user or users across that site.
+</para>
+
+<para>
+The two main classes that the user uses is the StorageManager and PoolManager. These give access to the pre-configured
+ProductStorage and ProductPool instances.
+</para>
+
+<para>
+Each ProductStorage and PoolStorage instance is defined by a configuration file. There are two currently supported formats for the configuration file: Jython and XML. Here are some simple examples of such file formats:</para>
+
+<para>A Jython configuration file:
+<screen>
+## mypool.py ##
+pool = SimplePool.getInstance()
+</screen>
+</para>
+
+
+<para>An XML configuration file:
+
+<screen>
+&lt;pool&gt;
+&lt;pool-type&gt;simple&lt;/pool-type&gt;
+&lt;param&gt;
+&lt;param-name&gt;id&lt;/param-name&gt;
+&lt;param-value&gt;devel&lt;/param-value&gt;
+&lt;/param&gt;
+&lt;/pool&gt;
+</screen>
+</para>
+
+<para>The jython configuration file must end with the extension '.py' and the XML file with '.xml'. See the DP User Documentation for further details of the usage of these files.</para>
+
+
+<para>
+The PoolManager is initialized through the following process:
+
+<itemizedlist>
+<listitem><para>Each property matching the pattern 'hcss.ia.pal.pool.*' is examined.</para></listitem>
+<listitem><para>The name of the ProductPool is taken from the last token of the property name, eg if the property name is
+'hcss.ia.pal.pool.a', the ProductPool name is 'a'. value of that property.</para></listitem>
+<listitem><para>The value of that property corresponds to the location and name of the configuration file. </para></listitem>
+<listitem><para>The configuration file is loaded, and depending on the format, a ProductPool instance is created. In the case of it being an XML file, the ProductPool is instantiated from a special PoolCreator class provided for that ProductPool type (see below).</para></listitem>
+<listitem><para>The ProductPool instance is assigned to an internal map, with the key corresponding to the pool name.</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+The StorageManager is initialized in a similar fashion.
+</para>
+
+<section id="xml-pool-creator">
+<title>Creating pools from XML: PoolCreator</title>
+<para>
+Each pool type (DbPool, FitsProductPool etc) requires different parameters to be instantiated. For XML configuration files, this corresponds to a different XML type, and a different loading strategy.</para>
+
+<para>
+The loading strategy is delegated to the pool implementation. The ProductPool implementer must provide:
+
+<itemizedlist>
+<listitem><para>A property specifying the class name of the PoolCreator implementation, to be included in the pal.xml property file of the ia_pal CVS module.
+</para></listitem>
+<listitem><para>An implementation of the herschel.ia.pal.PoolCreator . 
+</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+The property must have the form
+
+<screen>
+hcss.ia.pal.poolfactory.&lt;type&gt;
+</screen>
+
+Where &lt;name&gt; is the name of the pool type.
+</para>
+
+<para>
+The pal.xml file currently has knowledge of the properties and PoolCreator implementations
+for the following pool types: SimplePool, lstore, DbPool, CachedPool and the SerialClientPool.
+In the case of the SimplePool implementation, for example, 
+the pal.xml definitions file contains the following property name/value pair:
+
+<screen>
+hcss.ia.pal.poolfactory.simple=herschel.ia.pal.pool.simple.SimplePoolFactory
+</screen>
+
+The SimplePoolFactory class implements the PoolCreator interface.</para>
+
+<para>
+The PoolCreator has one method:
+
+<screen>
+createPool(String strPoolType, Map&lt;String, String&gt; params)
+</screen>
+</para>
+
+<para>
+The first argument, strPoolType, is the type of the ProductPool and is taken from the &lt;pool-type&gt; field of the XML configuration file. 
+This value must match the type of ProductPool that the PoolCreator implementation is addressing.
+</para>
+
+<para>
+The types for the currently available pool implementations are:
+
+<informaltable>
+<tgroup cols="2">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+
+<thead>
+<row>
+<entry>Pool Implementation</entry>
+<entry>Pool Type</entry>
+</row>
+</thead>
+
+<tbody>
+<row>
+<entry>Local Store</entry>
+<entry>lstore</entry>
+</row>
+
+<row>
+<entry>DbPool</entry>
+<entry>db</entry>
+</row>
+
+<row>
+<entry>SimplePool</entry>
+<entry>simple</entry>
+</row>
+
+<row>
+<entry>CachedPool</entry>
+<entry>cache</entry>
+</row>
+
+<row>
+<entry>SerialClientPool</entry>
+<entry>serial</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+
+</para>
+
+
+<para>
+The second argument, params. is a map of parameter name-value pairs taken from the XML configuration file. These need again to be appropriate for the pool type. The createPool() method uses the params map to instantiate a ProductPool of that type.
+</para>
+
+</section>
+
+<section id="simplifiedConfiguration">
+<title>Simplified managers configuration</title>
+
+<para>
+In order to simplify things when configuring the pool and storage managers,
+it is allowed to use some defaults, so that when some configuration data
+is not specified, the managers will work with the defaults.
+</para>
+
+<para>
+For a more detailed explanation of this simplified mechanism, please refer
+to the javadoc documentation of <ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/pal/PoolManager.html">PoolManager</ulink>
+and <ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/pal/StorageManager.html">StorageManager</ulink>
+classes.
+</para>
+
+</section>
+
+</section>
+
+<section id="extending-pal">
+<title>Extending the PAL</title>
+<para>
+There are a number of classes and interfaces made available in the PAL framework for a developer to extend or implement.
+For example, developers are able to provide their own implementations of ProductPools, their own customized contexts,
+and their own customized rules. In this section, what can be extended, and important constraints, are discussed.
+</para>
+
+<section id="pools">
+<title>Writing your own ProductPools</title>
+<para>
+
+The following constraints shall be met when writing a ProductPool:
+
+<itemizedlist>
+<listitem><para>A pool should, naturally, implement the ProductPool interface.</para></listitem>
+<listitem><para>Each Product saved shall be assigned to a unique URN.</para></listitem>
+<listitem><para>Any Product that is stored in the pool should be accessible via a unique URN</para></listitem>
+<listitem><para>It should be possible to save any Product. If not, it should be clearly documented any exceptions.</para></listitem>
+</itemizedlist>
+
+In addition, a PoolCreator interface implementation and associated property must be defined (<xref linkend="xml-pool-creator" />).
+
+</para>
+</section>
+
+<section id="writing-contexts">
+<title>Writing your own Contexts</title>
+<para>
+A developer can write his own Context subclass by extending the abstract Context class, or extending one of the supplied concrete derivations, MapContext or ListContext.
+</para>
+
+<para>
+It is strongly recommended that the developer ascertains whether using MapContext or ListContext, or deriving from MapContext or ListContext, would suit his needs,
+as creating a full concrete implementation by directly subclassing the Context class is significant work. 
+</para>
+
+<para>
+Whatever the approach the developer takes, the following constraints shall be met when writing a Context:
+
+<itemizedlist>
+<listitem><para>It should, naturally, extend the Context abstract class.</para></listitem>
+<listitem><para>A context should be designed to be as lightweight as possible, such that the heavyweight data containers are leaf products.</para></listitem>
+<listitem><para>When possible, assign rules to constrain what Products shall and shall not be allowed in the context.</para></listitem>
+</itemizedlist>
+
+</para>
+
+<section id="writing-rules">
+<title>Writing your own Rules for Contexts</title>
+<para>
+The standard Context types supplied, MapContext and ListContext, allow a developer to supply his own rules by simply extending one of those
+classes, and overriding the respective getAddingRule() method. 
+</para>
+
+<para>
+When extending the Context class directly, the developer would need to provide additional code along similar lines to what are provided in the MapContext or ListContext classes.
+It is suggested that the developer browse through the source code of one of these classes for further information.
+</para>
+</section>
+
+
+</section>
+
+<section id="writing-tests">
+<title>Writing test harnesses for the PAL: the PAL common test suite</title>
+<para>
+When extending the PAL, specifically when adding new ProductPool implementations, 
+it is highly recommended to run a common set of tests that verify the quality of that pool implementation.
+</para>
+
+<para>
+The common set of tests are available under the test tree of the ia_pal package. To make use of the common tests, the pool implementor should write a test class that:
+
+<itemizedlist>
+<listitem><para>Extends the abstract class herschel.ia.pal.CommonPalTestSet (note that this is only available in the parallel test tree)</para></listitem>
+<listitem><para>Provides implementations for the methods createPool(), setUp(), tearDown(), oneTimeSetUp(), and oneTimeTearDown().</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+For an example, look at the herschel.ia.pal.pool.simple.SimplePoolTest, of the CVS module
+ia_pal_pool_simple. This is also in the parallel test tree.
+</para>
+
+<section id="contrib-common-test">
+<title>Contributing to the PAL common test suite</title>
+<para>
+If you wish to contribute a test method to the PAL common test suite, the process is a little more complicated, but as follows:</para>
+
+<para>
+<itemizedlist>
+<listitem><para>Choose a name for your test method that is unique to the list in the CommonPalTestSet class.It should start with the string 'test'.</para></listitem>
+<listitem><para>Choose a *PalTestGroup instance you want your test method to belong to. 
+If you prefer to write a completely new PalTestGroup, do so. You need to extend the AbstractPalTestGroup class. </para></listitem>
+<listitem><para>Update the appropriate PalTestGroup class, adding your method.</para></listitem>
+<listitem><para>Update the CommonPalTestSet class, adding a method of the same name as your test. In that method, call the method you added in the PalTestGroup class.</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+There are a number of examples in the ia_pal test harness if you need an illustration.
+</para>
+
+</section>
+
+
+</section>
+
+</section>
+
+</article>

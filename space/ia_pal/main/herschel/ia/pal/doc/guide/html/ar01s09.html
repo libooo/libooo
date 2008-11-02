@@ -1,0 +1,138 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>9.&nbsp;Product Versioning</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s08.html" title="8.&nbsp;Product Cloning"><link rel="next" href="ar01s10.html" title="10.&nbsp;Pool evolution tool"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">9.&nbsp;Product Versioning</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s08.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s10.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="versioning"></a>9.&nbsp;Product Versioning</h2></div></div></div><p>
+Different versions of a product belong to an <span class="emphasis"><em>edition</em></span>,
+as in the following example:
+</p><p>
+<pre class="screen">
+edition = Product()
+storage.save(edition) # version 0 of edition saved
+# Modify edition
+storage.save(edition) # version 1 of edition saved
+....
+</pre>
+</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+The product type must be constant along a version track. Changing the type of a
+product already saved, and trying to save it again, will lead to an exception.
+</td></tr></table></div>
+</p><p>
+To get the latest version of an edition, or the list of versions for that edition,
+you need to have available one arbitrary version of that edition.
+With that version, you can recover the latest version of that edition,
+and the list of all versions of that edition:
+</p><p>
+<pre class="screen">
+latest=storage.getHead(productRefOfAnyVersionOfEdition)
+versions=storage.getVersions(productRefOfAnyVersionOfEdition)
+</pre>
+</p><p>
+You can get information on the current versions of each product,
+as well as tag information, as follows:
+</p><p>
+<pre class="screen">
+System.out.println(storage.getVersioningInfo());  // Java
+print storage.versioningInfo                      # Jython
+</pre>
+</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+In order to let product versioning work, pools have to be accessed always
+through a ProductStorage. So <span class="emphasis"><em>avoid using pools directly</em></span>.
+</td></tr></table></div>
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="versioning.querying"></a>9.1.&nbsp;Querying</h3></div></div></div><p>
+The default query is to search for just the latest versions of editions:
+</p><p>
+<pre class="screen">
+query=AttribQuery(Product, "p", "1")
+storage.select(query) # Just the latest versions
+</pre>
+</p><p>
+If you want to get all versions of editions that match a query,
+use the extended query constructors, setting the forth argument to true:
+</p><p>
+<pre class="screen">
+query=AttribQuery(Product, "p", "1", 1)
+storage.select(query) # All versions of editions that match
+</pre>
+</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+With this extended query, the special products containing versioning
+information, VersionTrackProduct and TagsProduct, are also returned if they
+match the query.
+</td></tr></table></div>
+</p><p>
+<div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Caution"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Caution]" src="../images/caution.gif"></td><th align="left">Caution</th></tr><tr><td valign="top" align="left">
+Make sure that you use the meta.containsKey()
+checks when performing Full or Meta-data queries, as the presence of version
+products may affect those queries, or worse, result in an exception if the
+metadata being queried for is not present in any version product.
+</td></tr></table></div> 
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="versioning.tagging"></a>9.2.&nbsp;Tagging</h3></div></div></div><p>To save a product with a given tag:</p><p>
+<pre class="screen">
+storage.saveAs(myproduct, "mytag") # saves myproduct to URN=product:123, and links tag 'mytag' to that URN
+storage.load("mytag") # returns a ProductRef to product at URN=product:123
+</pre>
+</p><p>To assign a tag to an existing product in the storage:</p><p>
+<pre class="screen">
+storage.setTag("mytag", urn)
+</pre>
+</p><p>You can assign multiple tags to the same product:</p><p>
+<pre class="screen">
+storage.setTag("mytag1", urn)
+storage.setTag("mytag2", urn)
+storage.setTag("mytag3", urn)
+</pre>
+</p><p>You can re-assign tags from one product to another:</p><p>
+<pre class="screen">
+storage.setTag("mytag", urn1)
+storage.setTag("mytag", urn2)  # removes the tag mytag from urn1, and re-assigns it to urn2
+</pre>
+</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+A given tag maps to only one URN.
+</td></tr></table></div>
+</p><p>
+You can also remove tags from the system: 
+</p><p>
+<pre class="screen">
+storage.removeTag("mytag")     # removes the tag, but not the product
+</pre>
+</p><p>
+And check if a given tag exists: 
+</p><p>
+<pre class="screen">
+print storage.tagExists("mytag")
+</pre>
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="versioning.oldpools"></a>9.3.&nbsp; Using the new versioning mechanism against existing pools</h3></div></div></div><p>
+You can use the new versioning mechanism against pools with previously
+existing data. Although it is highly recommended to use the mechanism
+against new pools with no data.
+</p><p>
+If you wish to use the mechanism against pools with existing data, be aware
+that existing products in your pool do not have versioning information.
+So if you modify such products, and then save them:
+</p><p>
+<pre class="screen">
+p = oldstorage.load("myurn").product
+# modify p
+oldstorage.save(p)
+</pre>
+</p><p>
+the PAL does not know what version the modified product belongs to,
+and therefore saves the modified version of the product as the first version
+of a whole new version track.
+</p><p>
+It is therefore recommended to use the new versioning mechanism against a clean
+ProductStorage, devoid of any products, or as the next best thing, migrate your
+products to a fresh pool as follows:
+</p><p>
+<pre class="screen">
+storage.register(newpool)
+storage.register(oldpool)
+
+p = storage.load("urn:123").product
+storage.save(p) # saves the product with versioning information, to newpool
+</pre>
+</p><p>
+And then use the newpool for future sessions (archive or remove oldpool).
+</p><p>
+In order to copy a whole pool, the evolvePool tool can be used.
+</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s08.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s10.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">8.&nbsp;Product Cloning&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.&nbsp;Pool evolution tool</td></tr></table></div></body></html>

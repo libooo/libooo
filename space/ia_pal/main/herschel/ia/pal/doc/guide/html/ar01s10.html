@@ -1,0 +1,22 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.&nbsp;Pool evolution tool</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s09.html" title="9.&nbsp;Product Versioning"><link rel="next" href="ar01s11.html" title="11.&nbsp;Pool locking mechanism"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">10.&nbsp;Pool evolution tool</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s09.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s11.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="evolver"></a>10.&nbsp;Pool evolution tool</h2></div></div></div><p>
+When all products of a pool need to be changed in some way, it can be done
+by querying all of them, and save them back, with the new changes.
+</p><p>
+There is a problem though when doing this, because copying all products may
+not preserve hierarchy, or make duplicates if contexts share common leaf
+products.
+</p><p>
+This problem is solved by the evolvePool tool, that copy all products from a
+pool to another, by preserving their hierarchy. This tool is located at
+herschel/ia/pal/util. Here is the synopsis:
+</p><pre class="screen">
+Usage: evolvePool &lt;sourceId&gt; &lt;sourceType&gt; [&lt;targetId&gt; &lt;targetType&gt;] [&lt;copyAllVersions&gt;]
+  The sourceId and sourceType refer to the id and type of the source pool, resp. 
+  Allowed pool types are simple, db, and lstore.
+  The target pool is optional. If you don't provide a target, the source pool
+  will be updated with the evolved products, and the old products will be removed.
+  The copyAllVersions flag can be true or false; it indicates whether to copy all
+  versions of each root product, or just the last version of each root product.
+  If omitted, the default is to copy all versions of each root product.
+  A root product is any context or product not contained in other context.
+</pre></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s09.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s11.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">9.&nbsp;Product Versioning&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;11.&nbsp;Pool locking mechanism</td></tr></table></div></body></html>

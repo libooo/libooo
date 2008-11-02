@@ -1,0 +1,177 @@
+<chapter id="herschel.ia.pal.urm">
+  <title>Product Access Layer</title>
+
+  <section id="herschel.ia.pal-introduction.urm">
+    <title>Introduction</title>
+    
+    <simplesect>
+      <para>
+	The Product Access Layer consists of several elements that allow you to
+	save, retrieve and query Products that are stored in different locations
+	whether that is on your local file system or remotely.
+      </para>
+    </simplesect>
+        
+    <simplesect>
+      <para>
+	The <emphasis role="bold">ProductStorage</emphasis> class provides the
+	user front-end interface that allows you to communicate with <emphasis
+	  role="bold">Products</emphasis> stored in multiple locations.Note
+	that this is where the Product Access Layer fundamentally differs from
+	the (versant) ObjectStore, that only allows to connect to one database
+	in your session.
+      </para>
+    </simplesect>
+    <simplesect>
+      <para>
+	The locations mentioned above are what we call <emphasis
+	  role="bold">Product Pools</emphasis>; all Product pools adhere to the
+	<emphasis role="bold">ProductPool</emphasis> interface. Example
+	implementations of the ProductPool interface are local storage (on your
+	laptop), and remote pools, such as the future Herschel Archive,
+	accessing Products&nbsp; within a Versant database, a local storage
+	made available by a fellow astronomer etcetera.
+      </para>
+      <para>
+	Simply by <emphasis>registering</emphasis> a pool to your storage, you can access
+	the Products in that pool.
+      </para>
+    </simplesect>
+    <simplesect>
+      <para>
+	The ProductStorage provides mechanisms to load, save and query Products
+	in the registered pools. Doing so you receive a reference to a Product
+	(returned by the load() and save() commands) or a set of Product
+	references (when querying). This functionality of a Product reference
+	is provided by the <emphasis role="bold">ProductRef</emphasis>
+	class; it allows to fetch information of the Product -such as meta
+	data- without loading the Product in question in your memory completely.
+      </para>
+    </simplesect>
+    <simplesect>
+      <para>
+	The ProductStorage currently distincts three types of queries: 1) query
+	on attributes that are available to all Products, 2) queries on meta
+	data of the Product and 3) full data mining queries!
+      </para>
+    </simplesect>
+  </section>
+  
+  <!-- section -->
+  &herschel.ia.pal-example.urm;
+
+  <!-- section -->
+  &herschel.ia.pal.query.urm;
+
+  <!-- section -->
+  &herschel.ia.pal.pool.urm;
+
+  <section id="herschel.ia.pal-urn.urm">
+    <title>What is a URN ?</title>
+    <para>'URN' stands for Uniform Resource Name, and
+is simply a string identifier to uniquely identify any product
+stored in any pool.
+    </para>
+    <para>
+      URNs are automatically generated and assigned to a product when that product is written to a storage. You can find out what the URN is for a product through it's ProductRef. That ProductRef can in turn be retrieved from the return value of the ProductStorage.save() operation that had initially saved that product: 
+    </para>
+    <screen><![CDATA[
+    ref = storage.save(myproduct) # Save the product and get the ref
+    print ref.urn                 # Get the URN
+    ]]></screen>
+
+  </section>
+
+  <section id="herschel.ia.pal-contexts.urm">
+    <title>Context Products</title>
+    <para>Contexts are special types of products that contain references to other products stored. </para>
+    <para>This enables a means of building complex data structures in a storage.</para>
+    <para>There are two 'standard' types of context products provided: ListContext (for grouping products into sequences or lists) and MapContexts (for grouping products into containers with access to each by key).</para>
+  </section>
+
+  <section id="herschel.ia.pal-cloning.urm">
+    <title>Deep Copy or Cloning of Products</title>
+    <para>
+      Say you had a context in one storage that referenced another product, and you
+wanted to copy that data tree to a different storage. How would you do that?
+    </para>
+
+<para>
+It is possible to do this using the usual ProductStorage.save() method.
+If you pass as an argument the context pointing to the 'head' of the data tree
+you want to clone, the whole data tree is cloned.
+</para>
+
+<para>
+So for example, we have create a context with a child and store it in storage
+a:
+</para>
+
+    <screen><![CDATA[
+ l=ListContext()
+ p=Product()
+ l.refs.add(ProductRef(p))
+
+ storageA.save(l)
+    ]]></screen>
+
+<para>
+then we want to copy the context and child to a new storage, say storageB, all
+we do is as follows:
+</para>
+
+
+    <screen><![CDATA[
+ storageB.save(l)
+    ]]></screen>
+
+<para>
+The above cloning operation
+has one proviso: if a product within the data tree already
+exists in the destination product storage, it is not copied.
+A product can exist in the destination storage if for example,
+the original and destination storage happen to share a pool,
+and one of the products in the data tree being copied is in that common pool.
+    </para>
+
+<para>
+Note that a context may have older versions of it stored in a storage (a older
+version of a context may be saved when a context is saved, modified, then saved
+again). The older versions of the context specified in the
+ProductStorage.save() argument are also cloned (if that context has any
+decendents that are contexts, the local versions of those descendent contexts
+are not cloned, however).
+    </para>
+  </section>
+
+  <section id="herschel.ia.pal-api.urm">
+    <title>Interface Definitions</title>
+    
+    <simplesect>
+      <para>Product Storage:</para>
+      &herschel.ia.pal-ref;
+    </simplesect>
+
+    <simplesect>
+      <para>ProductPool implementations:</para>
+      &herschel.ia.pal.pool-ref;
+    </simplesect>
+
+    <simplesect>
+      <para>Query types:</para>
+      &herschel.ia.pal.query-ref;
+    </simplesect>
+
+    <simplesect>
+      <para>Context Products:</para>
+      &herschel.ia.pal.context-ref;
+    </simplesect>
+
+    <simplesect>
+      <para>Product Browser:</para>
+      &herschel.ia.pal.browser-ref;
+    </simplesect>
+  </section>
+  
+</chapter>
+

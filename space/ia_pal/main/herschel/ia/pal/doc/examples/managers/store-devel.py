@@ -1,0 +1,1 @@
+store.register(pools['a'])

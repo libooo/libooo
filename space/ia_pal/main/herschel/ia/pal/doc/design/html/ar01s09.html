@@ -1,0 +1,25 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>9.&nbsp;Locking mechanism</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-design.html" title="Product Access Layer Design"><link rel="up" href="pal-design.html" title="Product Access Layer Design"><link rel="prev" href="ar01s08.html" title="8.&nbsp;Queries"><link rel="next" href="ar01s10.html" title="10.&nbsp;The PAL Common Test Suite"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">9.&nbsp;Locking mechanism</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s08.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s10.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="locking"></a>9.&nbsp;Locking mechanism</h2></div></div></div><p>
+In order to provide concurrent modification of products in a pool, a basic locking mechanism has been implemented.
+The need arose with the versioning mechanism, in which the TagsProduct may need to be updated by many processes
+at the same time. Without this mechanism, some processes can override changes in the TagsProduct performed
+by other processes.
+</p><p>
+The locking mechanism is based on the new interface Lockable, which now ProductPool extends.
+A client of a pool can then take "ownership" of that pool by calling <span class="emphasis"><em>pool.acquireLock()</em></span>,
+and has to drop it through <span class="emphasis"><em>pool.releaseLock()</em></span> when its "transaction" is done.
+</p><p>
+A basic lock implementation has been provided through the BasicLock class, which simply writes
+a temporary file when the lock is acquired, and removes it when it is released.
+On the other hand, the PoolDaemon takes into account the process that acquired the lock, and
+only that process is allowed for releasing it.
+</p><p>
+The VersionTrackHandler makes use of this mechanism, assuring that the lock is released
+even in the presence of exceptions (with finally blocks), when <span class="emphasis"><em>hcss.ia.pal.sharedMode</em></span>
+is set to true, or ProductStorage.setSharedMode(true) has been called.
+</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+If a process is killed while it has the lock acquired, the lock may not be released.
+Server pools (PoolDaemon and HttpPoolServlet) shall use a TimedLock for handling this contingency,
+so that the lock is automatically released after a given time interval.
+</td></tr></table></div>
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s08.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s10.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">8.&nbsp;Queries&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-design.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;10.&nbsp;The PAL Common Test Suite</td></tr></table></div></body></html>

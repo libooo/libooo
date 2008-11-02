@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+ <pool>
+  <pool-type>cachedpool</pool-type>
+  <wrapped-pool>
+   <pool-type>simplepool</pool-type>
+   <param>
+    <param-name>id</param-name>
+    <param-value>production</param-value>>
+   </param>
+  </wrapped-pool>
+ </pool>

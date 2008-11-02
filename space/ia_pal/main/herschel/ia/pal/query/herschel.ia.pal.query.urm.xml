@@ -1,0 +1,154 @@
+<section id="herschel.ia.pal.query.urm">
+  <title>Querying</title>
+  <para>
+    The Product Access Layer allows to select product references from a
+    <link linkend="herschel.ia.pal.ProductStorage">ProductStorage</link> by
+    specifying a query.
+  </para>
+  
+  <section>
+    <title>Query types</title>
+    <para>
+      We distinct three types of queries:
+    </para>
+    <itemizedlist>
+      <listitem>
+	<para><xref xrefstyle="select: title" linkend="herschel.ia.pal.query.AttribQuery"/></para>
+	<para>Allows searching on meta data values -so called attributes- that
+	  appear in any product. The attribute names are:</para>
+	<itemizedlist>
+	  <listitem>creationDate : Date</listitem>
+	  <listitem>creator      : String</listitem>
+	  <listitem>endDate      : Date</listitem>
+	  <listitem>instrument   : String</listitem>
+	  <listitem>modelName    : String</listitem>
+	  <listitem>startDate    : Date</listitem>
+	  <listitem>type         : String</listitem>
+	</itemizedlist>
+      </listitem>
+      
+      <listitem>
+	<para><xref xrefstyle="select: title" linkend="herschel.ia.pal.query.MetaQuery"/></para>
+	<para>Allows searching on all meta data values and descriptions</para>
+      </listitem>
+      
+      <listitem>
+	<para><xref xrefstyle="select: title" linkend="herschel.ia.pal.query.FullQuery"/></para>
+	<para>Allows searching on all aspects of Products exploiting the full
+	  interface of the Product family in question</para>
+      </listitem>
+      
+    </itemizedlist>
+  </section>
+  
+  <section>
+    <title>Creation of a query</title>
+    <para>All queries are setup and executed on a <xref xrefstyle="select:
+	title" linkend="herschel.ia.pal.ProductStorage"/> as follows:</para>
+    <screen><![CDATA[
+ query=.....Query(product-class,variable,where-expression)
+ results=storage.select(query)]]></screen>
+
+    <para>,where:</para>
+    <itemizedlist>
+      <listitem><emphasis>product-class</emphasis> is the product family. All
+	products are derived from the Product class, but products may be
+	categorized in sub-families such as PacsProduct.</listitem>
+      <listitem><emphasis>variable</emphasis> is a string holding the name of
+	the product variable that is used in the
+	<emphasis>where-expression</emphasis>.</listitem> 
+      <listitem><emphasis>where-expression</emphasis> is a string that specifies the actual
+	  expression for which products of the
+	  <emphasis>product-class</emphasis> should be matched against. Note: the 
+	  syntax is identical to the syntax of the JIDE command-line.</listitem>
+    </itemizedlist>
+
+    <para>An example:</para>
+    <screen><![CDATA[
+ query=AttribQuery(SomeProduct,'prod',
+                   'prod.creator=="Me" and prod.modelName=="Fake"')]]></screen>
+  </section>
+  
+  <section>
+    <title>Query strategy</title>
+    <para>Typically an AttribQuery is faster than a MetaQuery which is in turn
+      faster than a FullQuery. Depending on the product pools that are
+      registered, a query can take some time; to avoid unnecessary waiting time
+    one can adopt a strategy of staged queries.</para>
+
+    <para>For example, a query on attributes is executed first. If too many
+      hits are found, you can refine your query by executing another query
+      <emphasis>using the hits returned from the previous query</emphasis>.
+      This process can be repeated until the number of hits have been reduced
+      to a digestable amount:
+    </para>
+    <screen><![CDATA[
+ results=storage.select(AttribQuery(...))       # 1000 hits
+ results=storage.select(MetaQuery(...),results) # 100 hits
+ results=storage.select(MetaQuery(...),results) # 50 hits
+ results=storage.select(FullQuery(...),results) # 3 hits]]></screen>
+
+  </section>
+
+  <section>
+    <title>Querying for metadata in products </title>
+    <para>One thing you need to watch out when performing a meta or full query, is when you try to query for a metadata that does not exist in one or more products that you are applying the query to.</para>
+
+   <para>For example, consider the following MetaQuery:</para>
+
+    <screen><![CDATA[
+     query =MetaQuery(Product, 'p', 'p.meta["temperature"].value==10)
+     resultset=storage.select(query)
+]]></screen>
+
+  <para>The query first starts creating a shortlist of all products in the storage matching type
+  'Product'. It then runs the query string on each product in that
+  shortlist. If any of those products don't contain the information referenced
+  in the query string, an error is raised.
+  </para>
+
+  
+  <para>
+  There are two ways to avoid this:
+  </para>
+
+  <para>
+
+<itemizedlist>
+<listitem>
+  <para>
+  Be as specific as you can when it comes to specifying the product type in
+  a query. If you know the product type you want to query is of type
+  'CalHrsQDCFull', then specify that. Running queries using the most general
+  product type of 'Product' is not recommended, unless the products you have sav
+ed
+  are of this type only.
+  </para>
+</listitem>
+<listitem>
+    <para>
+  Run a two-stage query, using the containsKey() operator to check whether
+  a component exists first, eg
+    </para>
+    <para>Get a sub-set of products that contain the metadata 'temperature':</para>
+
+    <screen><![CDATA[
+     queryOne= MetaQuery(Product, 'p', 'p.meta.containsKey("temperature")')
+     resultsetOne = storage.select(queryOne)
+]]></screen>
+
+<para>Run the original query on this subset:</para>
+
+    <screen><![CDATA[
+     queryTwo =MetaQuery(Product, 'p', 'p.meta["temperature"].value==10)
+     resultsetTwo = storage.select(queryTwo, resultSetOne)
+]]></screen>
+</listitem>
+</itemizedlist>
+  </para>
+
+
+</section>
+
+  </section>
+

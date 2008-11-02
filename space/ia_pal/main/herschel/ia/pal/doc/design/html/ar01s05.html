@@ -1,0 +1,20 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.&nbsp;Contexts</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-design.html" title="Product Access Layer Design"><link rel="up" href="pal-design.html" title="Product Access Layer Design"><link rel="prev" href="ar01s04.html" title="4.&nbsp;ProductStorage and ProductPools"><link rel="next" href="ar01s06.html" title="6.&nbsp;Storage and PoolManagers for configured ProductStorages and ProductPools"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">5.&nbsp;Contexts</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s04.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s06.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="contexts"></a>5.&nbsp;Contexts</h2></div></div></div><p>
+There are often situations in which Products need to be grouped together 
+(e.g. a set of Products processed from a given observation, a set of calibration 
+Products for a given instrument). These groupings need to be available persistently.</p><p>The PAL provides for this by introducing the notion of a 'Context'. 
+Contexts contain references to those Products that are considered as part of the same group.
+Again, for lightweight access, those references are in fact ProductRefs. 
+</p><p>
+As mentioned earlier, the PAL saves persistently Products <span class="emphasis"><em>only</em></span>; 
+therefore Contexts themselves are subclasses of Products so that they can be saved.
+</p><p>
+The Context class itself is abstract, so that developers can provide their own specializations.
+With the view that users will most of the time require groupings in accordance to a List-like structure or
+Map-like structure, two 'standard' specializations are provided: ListContext and MapContext.
+</p><p>
+Taking into consideration that users may wish to restrict 
+what data should be allowed in such contexts, the ListContext and MapContext 
+implement the concept of 'rules'. 
+Rules are implemented using the <a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/share/predicate/Predicate.html" target="_top">predicate</a> interface.
+Developers may provide their own rules by extending the ListContext and MapContext classes.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s04.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s06.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">4.&nbsp;ProductStorage and ProductPools&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-design.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;6.&nbsp;Storage and PoolManagers for configured ProductStorages and ProductPools</td></tr></table></div></body></html>

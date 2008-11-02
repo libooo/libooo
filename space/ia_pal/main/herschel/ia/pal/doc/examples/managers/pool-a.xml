@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+ <pool>
+  <pool-type>simplepool</pool-type>
+  <param>
+   <param-name>id</param-name>
+   <param-value>devel</param-value>
+  </param>
+ </pool>

@@ -1,0 +1,433 @@
+<?xml version="1.0"?>
+<!DOCTYPE book SYSTEM "../../../docbook/dtd/docbookx.dtd">
+<!-- <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN"> -->
+
+<article>
+<articleinfo>
+<title>Product Access Layer Design</title>
+<date>01 November 2007</date>
+<issuenum> HERSCHEL-HSC-DOC-0839 Issue 0.4</issuenum>
+<author>
+<firstname>Hassan</firstname><surname>Siddiqui</surname>
+</author>
+</articleinfo>
+
+<section id="doc-spec">
+<title>Document Information</title>
+<para>
+<itemizedlist>
+<listitem><para>DOC ID: HERSCHEL-HSC-DOC-0839</para></listitem>
+<listitem><para>Issue: 0.4</para></listitem>
+<listitem><para>Date: 01 Nov 2007</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section id="introduction">
+<title>Introduction</title>
+<para>
+This document is intended:
+
+<itemizedlist>
+<listitem><para>For developers of the Product Access Layer (PAL) 
+who are developing or maintaining parts of the PAL.</para></listitem>
+<listitem><para>For the DP System Architecture Group to 
+have an understanding of the PAL design to ensure a uniform system-wide development.</para></listitem>
+</itemizedlist>
+</para>
+
+</section>
+
+<section id="design-principles">
+<title>Design principles</title>
+
+<para>The main design principles of the PAL are listed here:</para>
+
+<para>
+<itemizedlist>
+<listitem><para>The PAL is a framework to allow the persistent storage and access
+of <ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/dataset/Product.html">Products</ulink>.</para></listitem>
+<listitem><para>The PAL does not provide support for any other persistent data type other than Products and subclasses of Products.</para></listitem>
+<listitem><para>The PAL is <emphasis>not</emphasis> intended to be a fully-fledged database. It has support for the saving and subsequent reloading of products and basic query support. Other database features (sophisticated querying, atomic transactions and roll-backs, etc) are beyond the scope of the PAL design (but individual PAL ProductPool implementations may provide such support in their implementation).</para></listitem>
+<listitem><para>The framework is designed such that the functionality can be expanded (eg different ProductPool implementations and different Context implementations).</para></listitem>
+<listitem><para>The PAL framework is designed with lightweight access to data in mind. The lazy-loading of Products via the ProductRef mechanism is the most significant example.</para></listitem>
+</itemizedlist>
+</para>
+
+<para>Contexts for grouping of products.</para>
+<para>Attribute/meta/full queries provide different layers of querying.</para>
+
+</section>
+
+
+<section id="storage-pools">
+<title>ProductStorage and ProductPools</title>
+<para>
+In the PAL, Products can be stored in a number of different storage areas, for example, in a users local file system, in a database, or across the network. Each different storage area is considered in the PAL design as a 'ProductPool'.
+
+The essential design points for a ProductPool is as follows:
+</para>
+
+<para>
+<itemizedlist>
+<listitem><para>Products that are saved in a ProductPool are recoverable by a unique string ID. 
+This string ID is a Uniform Resource Locator or URN.</para></listitem>
+<listitem><para>Products saved are always allocated a new URN - they never re-use a URN
+of a previously saved Product (unless that previously saved Product is deleted).</para></listitem>
+<listitem><para>Products saved are never subsequently modified; instead a new Product with a new URN is saved
+(although for users accessing data through a ProductStorage instance, the design does not prevent Products from being <emphasis>perceived</emphasis> as being modified).</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+One other design consideration is how a user would access data across ProductPools. In the most general sense, users will access data across more than one ProductPool - for example, an astronomer may query for Products across the Herschel Science Archive and data stored on his own laptop. So the PAL introduced a single class - the ProductStorage - that emcompasses operations across multiple ProductPools.   
+</para>
+
+<para>
+A ProductStorage acts as the single entry point for users operations; users do not access ProductPools directly.This enables the ProductStorage to take requests from users, process that request internally if necessary, and then make the appropriate calls to the appropriate ProductPool implementations.
+</para>
+
+<para>
+A ProductStorage class needs visibility as to which ProductPools it is supposed to handle, so the user 'registers' ProductPools to the ProductStorage instance.
+</para>
+
+<para>
+It was mentioned earlier that one design principle of the PAL is lightweight access to data. 
+Products can in principle be very large in size, so pulling out a single Product from a ProductPool could result in a large memory footprint. 
+The PAL design allows users to keep a 'handle' on Products, and have access 
+to their attributes and meta-data without pulling the entire Product in memory 
+by introducing a special intermediary class called a 'ProductRef'. 
+When it comes to accessing Products, the ProductStorage and ProductPools 
+provide methods (load() and select()) that do not return the Product directly, but instead ProductRefs.
+</para>
+<para>When the referenced product is already saved, and the ProductRef is asked for retrieving it
+through the getProduct() method, it loads and returns the product, but doesn't keep it in memory,
+unless the product is a Context, in which case it's kept for further accesses. This mechanism
+saves space in memory when accessing heavyweight products.</para>
+
+<para>
+A class diagram
+showing relation of the classes discussed above is provided in <xref linkend="figure-pal-storage-pool" />.
+
+<figure id="figure-pal-storage-pool"><title>ProductStorage, ProductPools and ProductRef class diagram.</title>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="../images/PAL-ProductStoragePool.png" format="PNG"/></imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>
+You can consult specific information of each kind of pool:
+<itemizedlist>
+<listitem><ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/cache/index.html">CachedPool</ulink></listitem>
+<listitem><ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/db/index.html">DbPool</ulink></listitem>
+<listitem><ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/lstore/index.html">LocalStore</ulink></listitem>
+<listitem><ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/serial/index.html">SerialPool</ulink></listitem>
+<listitem><ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/pal/pool/simple/index.html">SimplePool</ulink></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<note>
+New types of pools are planned to be added:
+<itemizedlist>
+<listitem><emphasis>HttpPoolServlet</emphasis> is the variant of PoolDaemon that allows remote access through HTTP.</listitem>
+<listitem><emphasis>HttpClientPool</emphasis> is the counterpart of SerialClientPool, to remotely connect to an HttpPoolServlet.</listitem>
+<listitem><emphasis>HsaPool</emphasis>, with the two versions remote and local also, will provide access to the Hershel Science Archive (HSA).</listitem>
+</itemizedlist>
+</note>
+</para>
+
+</section>
+
+<section id="contexts">
+<title>Contexts</title>
+<para>
+There are often situations in which Products need to be grouped together 
+(e.g. a set of Products processed from a given observation, a set of calibration 
+Products for a given instrument). These groupings need to be available persistently.</para>
+
+<para>The PAL provides for this by introducing the notion of a 'Context'. 
+Contexts contain references to those Products that are considered as part of the same group.
+Again, for lightweight access, those references are in fact ProductRefs. 
+</para>
+
+<para>
+As mentioned earlier, the PAL saves persistently Products <emphasis>only</emphasis>; 
+therefore Contexts themselves are subclasses of Products so that they can be saved.
+</para>
+
+<para>
+The Context class itself is abstract, so that developers can provide their own specializations.
+With the view that users will most of the time require groupings in accordance to a List-like structure or
+Map-like structure, two 'standard' specializations are provided: ListContext and MapContext.
+</para>
+
+<para>
+Taking into consideration that users may wish to restrict 
+what data should be allowed in such contexts, the ListContext and MapContext 
+implement the concept of 'rules'. 
+Rules are implemented using the <ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/share/predicate/Predicate.html">predicate</ulink> interface.
+Developers may provide their own rules by extending the ListContext and MapContext classes.
+</para>
+
+</section>
+
+
+<section id="managers">
+<title>Storage and PoolManagers for configured ProductStorages and ProductPools</title>
+<para>
+It has been realized that site administrators (or other users)
+require a means of providing to their users 
+pre-configured ProductStorage and ProductPool implementations without them needing to construct them 'manually'.</para>
+
+<para>
+The design employed uses two managers: a StorageManager for ProductStorages, and a PoolManager for ProductPools. The administrator defines configuration files using either a Jython definition or an XML definition. The class diagram depicting the main classes is shown in <xref linkend="figure-managers" />.
+</para>
+
+<para>
+<figure id="figure-managers"><title>Class diagram for classes related to the storage and pool manager support.</title>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="../images/PAL-Managers.png" format="PNG"/></imageobject>
+</mediaobject>
+</figure>
+</para>
+
+</section>
+
+<section id="versioning">
+<title>Versioning, tagging and descriptors</title>
+<para>
+This section provides information about the support of PAL for:
+<itemizedlist>
+<listitem>versions of the stored products</listitem>
+<listitem>tags or alias to specific products</listitem>
+<listitem>additional descriptive information per product, called "descriptors"</listitem>
+</itemizedlist>
+as well as design aspects of these mechanisms.
+</para>
+
+<section id="pal-product-versioning">
+<title>Product versioning</title>
+<para>
+Each stored product belongs to a version track, which is identified by a <emphasis>trackId</emphasis>.
+</para>
+<para>
+When a product is stored the first time, a new track is created for it, and version 0 is assigned to it.
+</para>
+<para>
+When further versions of a stored product are saved, the track is maintained, and the version number is
+incremented to 1, 2, 3, etc.
+</para>
+<para>
+The versioning information when saving a product is obtained by the auxiliary
+(package private) class <emphasis>VersionHandler</emphasis>.
+</para>
+<para>
+ProductPool extends the interface <emphasis>Versionable</emphasis> for providing
+versioning support to the ProductStorage, like getting all the versions or the last version
+of a given track.
+</para>
+
+<note>
+<para>Each ProductPool is free for storing the versioning information in its own way.</para>
+<para>It can be just stored along with other descriptors (see below).</para>
+</note>
+</section>
+
+<section id="pal-product-tagging">
+<title>Product tagging</title>
+
+<para>
+Each product is identified by its URN. However, a URN can be difficult to remember.
+For retrieving a product whose URN is unknown, a (possible expensive) query shall be done.
+</para>
+
+<para>
+Tagging is a mechanism that allows a user to provide a meaningful name -tag or alias- to
+a given URN. Loading a product through its well known tag, which is a kind of
+index to the pointed product, is much faster than executing a query for finding it.
+</para>
+<para>
+The tagging information of the products is managed by the auxiliary
+(package private) class <emphasis>TagsHandler</emphasis>.
+</para>
+<para>
+ProductPool extends the interface <emphasis>Taggable</emphasis> for providing
+tagging support to the ProductStorage, like associating a tag to a urn, removing a tag,
+getting the urn of a given tag, or retrieving all defined tags.
+</para>
+
+<note>
+<para>
+There is a default implementation of the Taggable interface, provided by AbstractProductPool,
+which consists in storing the tags information in a special product, a <emphasis>TagsProduct</emphasis>.
+</para>
+<para>
+Any pool can override this implementation as needed.
+</para>
+</note>
+</section>
+
+<section id="pal-product-information">
+<title>Data, metadata and descriptors</title>
+<para>
+A product can contain what we call <emphasis>data</emphasis> (datasets: ArrayDatasets, TableDatasets and/or CompositeDatasets), and
+<emphasis>metadata</emphasis> (some of them are mandatory keys, called <emphasis>attributes</emphasis>, like creator, startDate, etc.,
+and some are optional, or only required for specific kind of products, like obsid).
+</para>
+<para>
+When saving a product, PAL stores additional information for each product,
+which are called <emphasis>descriptors</emphasis>. The current ones are:
+<itemizedlist>
+<listitem><para><emphasis>trackId</emphasis>: name of the version track</para></listitem>
+<listitem><para><emphasis>version</emphasis>: version number within the track</para></listitem>
+<listitem><para><emphasis>size</emphasis>: approximate size of the product, in bytes</para></listitem>
+<listitem><para><emphasis>totalSize</emphasis>: approximate size of the product and its children (if it's a Context), in bytes</para></listitem>
+<listitem><para><emphasis>hash</emphasis>: computed code for uniquely identifing the product</para></listitem>
+</itemizedlist>
+</para>
+<note>
+<para>
+Unlike data and metadata, descriptors are not stored within the product; they are hold in memory by the ProductRef.
+</para>
+<para>
+Each pool implementation can store the descriptors in its own way.
+</para>
+</note>
+</section>
+
+<section id="pal-key-class-interactions">
+<title>Key interactions during a save operation</title>
+When a user requests to save a product, the key operations are as follows:
+
+<para>
+<itemizedlist>
+<listitem><para>A ProductRef instance is created for that product, followed by a call to the commit() method with that ProductRef.</para></listitem>
+<listitem><para>If the product already exists in the storage, it is not saved again.</para></listitem>
+<listitem><para>Some descriptors, such as the product size, hash code, and version information are computed and stored in the ProductRef.</para></listitem>
+<listitem><para>The ProductRef (that is, the product and its descriptors) is saved in the writable pool.</para></listitem>
+<listitem><para>If the Product is a Context, additional information for keeping the references is stored also.</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+</section>
+
+
+<section id="queries">
+<title>Queries</title>
+<para>
+The PAL provides a query mechanism. To enable users to perform optimal queries, 3 types of queries were
+introduced:</para>
+
+<para>
+<itemizedlist>
+<listitem><para>AttribQueries that query only the attributes of Products</para></listitem>
+<listitem><para>MetaQueries that query only the attributes and meta-data of Products</para></listitem>
+<listitem><para>FullQueries that are full data-mining operations</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+In other words, linking to <xref linkend="pal-product-information"/> of previous chapter:
+<itemizedlist>
+<listitem>Querying for data is done through a <emphasis>FullQuery</emphasis></listitem>
+<listitem>Querying for mandatory metadata (attributes) is done through an <emphasis>AttribQuery</emphasis></listitem>
+<listitem>Querying for general metadata is done through a <emphasis>MetaQuery</emphasis></listitem>
+<listitem>Querying for descriptors is not yet supported, but it's foreseen to develop a <emphasis>DescriptorQuery</emphasis> for this</listitem>
+</itemizedlist>
+</para>
+
+<para>
+With these types of queries, the user can optimize his search strategy, and the pool implementation can optimize the query execution.
+</para>
+
+<para>
+The query classes are implementations of the StorageQuery interface. See <xref linkend="figure-query" />:
+
+<figure id="figure-query"><title>Class diagram for query-related classes.</title>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="../images/PAL-Query.png" format="PNG"/></imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Having 3 (or 4) different query types makes the user API cumbersome.</para>
+<para>For alleviating this, and for simplifying the condition part of the queries, a new enhanced
+<ulink url="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/pal/query/package-summary.html#package_description">Query</ulink>
+has been introduced.
+</para>
+
+</section>
+
+
+<section id="locking">
+<title>Locking mechanism</title>
+
+<para>
+In order to provide concurrent modification of products in a pool, a basic locking mechanism has been implemented.
+The need arose with the versioning mechanism, in which the TagsProduct may need to be updated by many processes
+at the same time. Without this mechanism, some processes can override changes in the TagsProduct performed
+by other processes.
+</para>
+
+<para>
+The locking mechanism is based on the new interface Lockable, which now ProductPool extends.
+A client of a pool can then take "ownership" of that pool by calling <emphasis>pool.acquireLock()</emphasis>,
+and has to drop it through <emphasis>pool.releaseLock()</emphasis> when its "transaction" is done.
+</para>
+
+<para>
+A basic lock implementation has been provided through the BasicLock class, which simply writes
+a temporary file when the lock is acquired, and removes it when it is released.
+On the other hand, the PoolDaemon takes into account the process that acquired the lock, and
+only that process is allowed for releasing it.
+</para>
+
+<para>
+The VersionTrackHandler makes use of this mechanism, assuring that the lock is released
+even in the presence of exceptions (with finally blocks), when <emphasis>hcss.ia.pal.sharedMode</emphasis>
+is set to true, or ProductStorage.setSharedMode(true) has been called.
+</para>
+
+<para>
+<note>
+If a process is killed while it has the lock acquired, the lock may not be released.
+Server pools (PoolDaemon and HttpPoolServlet) shall use a TimedLock for handling this contingency,
+so that the lock is automatically released after a given time interval.
+</note>
+</para>
+
+</section>
+
+<section id="common-test-suite">
+<title>The PAL Common Test Suite</title>
+
+<para>
+There is a common test suite provided such that developers extending the PAL can may verify the integrity of their implementations.
+</para>
+
+<para>
+In short, the test suite consists of a single abstract class, CommonPalTestSet,
+that pool implementors should extend. This class contains all the test methods that are run as part of the common test suite. The actions of those methods are actually delegated to a method of a PalTestGroup implementation. The design is depicted in <xref linkend="figure-common-test-suite" />.
+
+</para>
+
+<para>
+<figure id="figure-common-test-suite"><title>Class diagram illustrating the design of the common PAL test suite.</title>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="../images/PAL-TestSuite.png" format="PNG"/></imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>
+The PAL test harness architecture is admittedly complex, and adding further tests to that suite is complex. But it was felt necessary in order to simplify the work pool implementors need to do in order to implement the common test suite. The problem is that for a test run to report the success of each test method individually, there has to be a method in the pool implementation's test class corresponding to each and every method in the common PAL test suite.</para>
+
+<para>
+ So the choices are for either to have a pool implementor a test method corresponding to each and every method in the common PAL test suite, such that each of those methods delegates its action to that common PAL test suite method, or for the pool implementor to simply extend an abstract test class. The latter is a much more simpler approach.
+</para>
+</section>
+
+</article>

@@ -1,0 +1,401 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+
+
+
+
+  
+  
+  
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+
+<body>
+
+
+
+
+
+
+<h1 style="text-align: center;">PAL Query Improvement </h1>
+
+
+
+
+
+<p style="text-align: center;">Li Bo, Maohai Huang, Steve Guest&nbsp;</p>
+
+
+
+
+
+<p style="text-align: center;">2007-02-18</p>
+
+
+
+
+
+
+<h2>1. Overview</h2>
+
+
+
+
+<br>
+
+
+
+
+The following explains features implemented by the PAL Query
+Improvement package. Some features have not been completely implemented, and are listed at the end.<br>
+
+
+
+
+<br>
+
+
+
+
+User feedback is welcome in order to improve and focus this package.<br>
+
+
+
+
+<br>
+
+
+
+
+The goal of this package include<br>
+
+
+
+
+
+1) to streamline query syntax;
+    <br>
+
+
+
+
+
+2) to set no artificial limit on what can or cannot be queried from the user point
+    of view. Context, data, attributes, and anything with an iterator should be queried;
+    <br>
+
+
+
+
+
+3) to make it possible to optimize query by the pool.
+
+<h2>2. Query Syntax Simplification</h2>
+
+
+
+
+
+<h3>2.1 Syntax simplification</h3>
+
+
+
+
+
+The query API should allow simple, non-cluttered syntax to be executed.<br>
+
+
+
+
+
+e.g.
+<pre style="font-family: Courier New,Courier,monospace;">q=MetaQuery(Product,"p","p.instrument=='SPIRE'") </pre>
+
+
+
+
+
+can be simplified to:
+<pre style="font-family: Courier New,Courier,monospace;">q=Query("instrument=='SPIRE'") </pre>
+
+
+
+
+Here is another example, queried on specified objects:
+
+<pre style="font-family: Courier New,Courier,monospace;">q = FullQuery (SpectrometerDetectorSpectrum, "s", "s[A1][flux].data &gt; 0.01") </pre>
+
+
+
+
+
+is converted to
+<pre style="font-family: Courier New,Courier,monospace;">q = Query (SpectrometerDetectorSpectrum, "[A1][flux].data &gt; 0.01") </pre>
+<h3>2.1 Unified Metadata Query Syntax</h3>
+
+
+
+
+
+Metadata can be queried, in the same way as other types of query. For example:
+<pre style="font-family: Courier New,Courier,monospace;">q = Query ("instrument=='foo' and width&gt;=200 ")</pre>
+
+
+
+
+
+will work if &ldquo;width&rdquo; is a metadata item of the Products being queried, it will be converted to: 
+<pre style="font-family: Courier New,Courier,monospace;">MetaQuery(Product, "p","p.meta.containsKey('width') and (instrument =='foo'and p.meta['width'].value &gt;=200" ))</pre>
+
+
+
+
+
+<h3>2.1.1 Robust Handling of Metadata Query</h3>
+
+
+
+
+
+In the above example if the Product does not have metadata named &ldquo;width&rdquo;, 
+by default it will be quietly ignored .
+
+This can be overridden by setting property hcss.ia.pal.query.isQuiet to&lsquo;false&rsquo;, 
+in which case the user will get a complaint. For Example:
+<pre><span style="font-family: Courier New,Courier,monospace;">query = Query ("instrument=='foo' and width&gt;=200 ")</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">print query.where</span><br style="font-family: Courier New,Courier,monospace;"><br>The user could specify whether non-existent meta data or attributes appearing in the query should be quietly ignored by configuring hcss.ia.pal.query.isQuiet in herschel\ia\pal\defns\pal.xml. The default value is true. The converted result as shown by query.where will be: <br><span style="font-family: Courier New,Courier,monospace;">p.meta.containsKey('width') and (instrument =='foo'and p.meta['width'].value &gt;=200)</span><br>as a result during run-time if metadata does not contain 'width' there would be no warning or complaint.<br><br>If the hcss.ia.pal.query.isQuiet is set to false<br><br><span style="font-family: Courier New,Courier,monospace;">query.setQuiet(0)</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">print query.where</span><br style="font-family: Courier New,Courier,monospace;"><br>The query will be converted to simplly <span style="font-family: Courier New,Courier,monospace;">instrument ='foo'and p.meta['width'].value &gt;=200.<br><br></span></pre>
+<h3>2.2 Unified Syntax for All Query Types</h3>
+
+
+
+
+
+Now FullQuery, MetaQuery and AttribQuery can be chosen automatically for the user. For example:<span style="font-family: Courier New,Courier,monospace;">
+<br>
+<br>
+q = Query ("instrument=='foo' and width&gt;=200 ")</span>
+
+
+
+
+<br>
+<br>
+is internally converted to 
+<span style="font-family: Courier New,Courier,monospace;"><br>
+<br>
+q = MetaQuery ("Product","p","p.meta.containsKey('width') and (instrument =='foo'and p.meta['width'].value &gt;=200"))</span> 
+
+
+
+<br>
+<br>
+If, however, only &ldquo;instrument&rdquo; is present in the query it would be
+an AttribQuery. If any query parameter name is not associated with an
+attribute, like the query above, the name is assumed to be a metadata name.
+<br>
+
+
+
+<br>
+
+
+
+The following example is a FullQuery:<br>
+<br>
+<span style="font-family: Courier New,Courier,monospace;">#data mining query</span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">query=Query("['myTable']['x'].data[20] &gt; 10")</span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">#query.where will be converted to: </span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">#  p.containsKey('myTable') and p['myTable']['x'].data [20 ]&gt;10 </span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">print query.where</span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">#queryType is FullQuery</span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">print query.queryType </span><br style="font-family: Courier New,Courier,monospace;">
+<br>
+
+<h3>2.3 Override assignment operator</h3>
+Assignment operator was overridden, e.g. query "instrument='spire'" 
+  will be the same as "instrument=='spire'"
+
+<h3>2.4 Syntax of Query to allow meta words with variable names (SCR-4222)</h3>
+A new syntax like Query("meta['title']==title") was added to allow meta words with variable names.
+<br>
+From: D_IA_PAL_1_114
+  
+<h2>3. JIDE session namespace awareness </h2>
+
+User defined variables and functions in the JIDE session could be used in query. For Example:<br>
+<pre><span style="font-family: Courier New,Courier,monospace;">#dummy user defined function</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">def sum(a,c):</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">	return a+c</span><br style="font-family: Courier New,Courier,monospace;"><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">#query with user defined function</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">a=3</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">c=4</span><br style="font-family: Courier New,Courier,monospace;"><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">q=Query("type=='AbcProduct' and creator=='Scott' and sum(a, c)&gt;0")</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;"># will be converted to: </span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">#  p.type =='AbcProduct'and p.creator =='Scott'and sum (a , c)&gt;0 </span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">print query.where</span><br style="font-family: Courier New,Courier,monospace;"><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">#queryType is AttribQuery</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">print query.queryType</span><br style="font-family: Courier New,Courier,monospace;"><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">results=store.select(query);</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">print results</span><br style="font-family: Courier New,Courier,monospace;"></pre>
+
+
+<h2>4. Support query Context and Iterator </h2>
+
+Three methods are added to Query to support query Context and Iterator.
+
+<pre>
+	<span style="font-family: Courier New,Courier,monospace;">
+  /**
+    * Match the products where the expression evaluates to true.
+    */
+  public Set<ProductRef> match (Iterator<ProductRef> i);
+
+  /**
+    * Match the products where the expression evaluates to true.
+    */
+  public Set<ProductRef> match (Iterable<ProductRef> i);
+
+  /**
+    * Recursively search a context and match the expression ie subcontexts are also searched.
+    * This could also be done by Context implementing Iterable.
+    */
+  public Set<ProductRef> match (Context context);
+	</span>
+</pre>
+
+<h2>5. Nonfunctional Requirements</h2>
+ 
+Minimize or avoid changing existing classes is a non-functional requirement for this package.<br>
+
+<h2>6. Known Issues</h2>
+
+<h3>6.1 The querying does not allow variable names that agree with meta entries</h3>
+The querying does not allow variable names that agree with meta entries. See <a href="http://www.rssd.esa.int/herschel_webapps/servletsuite/ProblemReportServlet?area=hcss&mode=displayeditpr&id=4112">SPR-4112</a> 
+for a real example.
+<p>
+"
+I have an lstore containing 15 products, 2 of which are marked with an
+attribute "title =='Basic reduced data'".
+<pre>
+...
+> title =='Basic reduced data'
+> h = Query ("title==title")
+</pre>
+The result is the selection was not applied, but everything is returned.
+<p>
+The reason:
+<br>
+If there is a variable named 'title' already exist in the jide session and users want to make a MetaQuery using 'title' as a meta key, it will never work since the PAL parser can not distinguish whether to regard it as a meta key or variable. The best guess is to take it as variable. For a meta key is free to choose, the parser can never know if a key is a meta key before iterate on all of the products' meta.
+
+During the parsing, the PAL parser found that 'title' is in namespace, so it will leave it there. And since "title==title" always return true, so this query is same as Query ("1==1"), and it will return all of the records in the pool.
+"
+<h3>6.2 Attributes of Attributes</h3>
+<span style="font-family: Courier New,Courier,monospace;">
+
+
+
+
+    q = Query(&ldquo;foo.bar &gt;= 4&rdquo;)</span>
+where foo is an attribute does not work properly, although <span style="font-family: Courier New,Courier,monospace;">("['mytable'].value&gt;=4")</span> does.<br>
+
+
+
+
+<h2>7. To do list</h2>
+
+
+
+
+This section lists features that have not been implemented fully but are under investigation.<br>
+
+
+
+
+
+
+<h3>7.1. Execution Optimization</h3>
+
+
+
+
+If a query has &ldquo;and&rdquo; and &ldquo;or&rdquo; Boolean operands,
+and certain part of the query is formed with standard product
+attributes and scalar(s), or variables of scalar values, such part of
+the query is passed to the pool to optimize, using specialized query
+such as AttribQuery(). The collection of products returned by the pool
+will be used to complete full expression evalueation.
+For example:
+
+<pre style="font-family: Courier New,Courier,monospace;">query("instrument == 'SPIRE' and xxxx")</pre>
+
+
+
+
+
+
+is converted into these two steps:<br>
+
+
+
+
+1) AttribQuery('p.instrument == 'SPIRE')<br>
+
+
+
+
+2) query('xxxx') on the result of step 1) 
+
+<pre>However <br><br><span style="font-family: Courier New,Courier,monospace;">query("instrument == 'SPIRE' or xxxx")</span></pre>
+
+
+
+
+
+cannot be optimized the same way. 
+
+
+
+
+    <br>
+
+
+
+<!--
+<h2>
+6.&nbsp;How to run the demo</h2>
+
+
+
+
+ 
+
+<ul>
+
+
+
+
+  <li>confirm you have HCSS application(1090 or later) installed</li>
+
+
+
+
+	<li>add classes/** to the HCSS classpath, this also implicitly add
+herschel/ia/pal/defns/pal.xml(with directory) to the HCSS classpath </li>
+
+
+
+ 
+	<li>modify the herschel/share/property/xml_locations.txt, add an entry: " hcss.ia.pal herschel/ia/pal/defns/pal     false "</li>
+
+
+
+
+	<li>add scripts/pal/** to the HCSS jython scripts path </li>
+
+
+
+
+	<li>start JIDE to run the scripts/pal_api_demo.py</li>
+
+
+
+ 
+</ul>
+
+-->
+
+ 
+ 
+ 
+</body>
+</html>

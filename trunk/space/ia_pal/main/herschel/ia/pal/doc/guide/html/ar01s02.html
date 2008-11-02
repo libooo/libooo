@@ -1,0 +1,41 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>2.&nbsp;Quick Start</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="next" href="ar01s03.html" title="3.&nbsp;Introduction"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">2.&nbsp;Quick Start</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="pal-guide.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="quick-start"></a>2.&nbsp;Quick Start</h2></div></div></div><p>
+This section summarises the main points described in this document.
+This is useful for those who need a quick-start to the essentials of this document,
+and for those who are aware of most of the features of the PAL and merely need a summary
+of the major points here.
+
+<div class="informaltable"><table border="0" style="border-collapse: collapse;"><colgroup><col><col></colgroup><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Product</td><td style="border-bottom: 1px solid ; ">An instance, or subclass, of herschel.ia.dataset.Product .</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">ProductPool</td><td style="border-bottom: 1px solid ; ">A persistent storage repository for Products. A shortname is simply 'pool'. 
+This can be file-based, database-based, or network-based. A ProductPool can be used to represent Products 
+stored in the Herschel Science Archive (HSA), or Products stored on a user's laptop. ProductPools take care 
+of read/write and query operations on their data, and thus such operations can be optimized for different ProductPools, 
+depending on their nature (note that read/write/query operations that a user performs must go through the relevant ProductStorage instance.)
+</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">ProductStorage</td><td style="border-bottom: 1px solid ; ">This is the central class for
+reading, writing and querying Products. A shortname is simply 'storage'. 
+The ProductStorage performs its operations on one or many ProductPools
+that are 'registered' to it (the ProductStorage instance takes responsibility in delegating such operations to those ProductPools). 
+With such a scheme, it is possible to perform common queries on Products across
+a number of different physical locations; for example a query involving the HSA and data on a astronomer's laptop.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Contexts</td><td style="border-bottom: 1px solid ; ">These are a special subclass of Product that is used used to associate or 'group' 
+other stored Products. These are lightweight Products, in the sense that they only contain references (through
+as special object called a ProductRef)
+to other Products. Because Contexts are Products, Contexts can group other Contexts, thus forming
+Context 'trees'. There are two 'standard' Contexts provided with the herschel.ia.pal package:
+MapContext and ListContext.
+<sup>[<a href="#ftn.N1004C" name="N1004C">a</a>]</sup></td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Context 'rules'</td><td style="border-bottom: 1px solid ; ">These are implementations of the herschel.share.predicate.Predicate interface, 
+that determine what Products are allowed and what are not allowed to be inserted into a Context's group.
+</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">ListContext</td><td style="border-bottom: 1px solid ; ">A 'standard' context implementation provided with the herschel.ia.pal package. 
+A ListContext provides access to its group of Products (or more specifically, ProductRefs) 
+by (integer) index.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">MapContext</td><td style="border-bottom: 1px solid ; ">A 'standard' context implementation provided with the herschel.ia.pal package. A MapContext provides access 
+to its group of Products (or more specifically, ProductRefs) by a (String) key.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">ProductRef</td><td style="border-bottom: 1px solid ; ">This is a special lightweight object that provides a reference to a Product that is situated either
+in memory, or saved persistently. If the latter, the ProductRef will contain the URN to that Product.
+A ProductRef will provide access to the attributes and meta-data of that Product,
+and indirectly to the Product contents.
+</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Leaf Product</td><td style="border-bottom: 1px solid ; ">This term refers to non-Context Products. These are the products that stores actual data. 
+As these do not reference other Products
+as do Contexts, in a Context 'tree' of associations, such Products can only be the leaves of such trees.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">StorageQuery</td><td style="border-bottom: 1px solid ; ">Queries performed on a ProductStorage instance are implementations of this interface.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">AttribQuery</td><td style="border-bottom: 1px solid ; ">An implementation of StorageQuery that queries on one or more attributes of Products available
+from the relevant ProductStorage. This is a special type as it allows a ProductPool implementation to optimize such attribute query operations.</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">MetaQuery</td><td style="border-bottom: 1px solid ; ">An implementation of StorageQuery that queries on one or more meta-data attributes of Products available
+from the relevant ProductStorage. This is a special type as it allows a ProductPool implementation to optimize on such query operations.</td></tr><tr><td style="border-right: 1px solid ; ">FullQuery</td><td style="">An implementation of StorageQuery that performs a general query that could involve attributes, meta-data, 
+or the actual Product data contents, or a mixture.</td></tr></tbody><tbody class="footnotes"><tr><td colspan="2"><div class="footnote"><p><sup>[<a href="#N1004C" name="ftn.N1004C">a</a>] </sup>Note that Contexts are not used for versioning Products;
+a versioning support is addressed by a different concept that will be made
+available in the future.</p></div></td></tr></tbody></table></div>
+
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="pal-guide.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s03.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Product Access Layer Developers Guide&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;3.&nbsp;Introduction</td></tr></table></div></body></html>

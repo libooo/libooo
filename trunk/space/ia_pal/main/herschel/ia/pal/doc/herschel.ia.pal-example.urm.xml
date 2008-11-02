@@ -1,0 +1,65 @@
+<section id="herschel.ia.pal-example.urm">
+<title>Example Usage</title>
+
+  <section id="herschel.ia.pal.urm-example.registy">
+    <title>Creation and Registry</title>
+
+    <para>You can create a storage as follows:</para>
+    <screen><![CDATA[
+storage=ProductStorage()]]></screen>
+
+    <para>Then you have to assign the Product pools that you want to
+      access. You have to register at least one pool:</para>
+    <screen><![CDATA[
+storage.register(SimplePool.getInstance()) # simple storage on local file system 
+storage.register(SerialPoolClient("abc.xyz.org",123,"dummy"))
+:
+storage.register(poolN)]]></screen>
+
+  </section>
+
+  <section id="herschel.ia.pal.urm-example.rw">
+    <title>Save and Restoring Products</title>
+
+    <para>Saving a Product:</para>
+    <screen><![CDATA[
+# creation of a dummy product
+product=Product(creator="Me")
+product["array"]=ArrayDataset(data=Int1d.range(5))
+
+# save! returns reference to the saved product
+reference=storage.save(product)
+print reference.urn
+# urn:simple.default:herschel.ia.dataset.Product:0]]></screen>
+
+    <para>Loading a Product:</para>
+    <screen><![CDATA[
+reference=storage.load("urn:simple.default:herschel.ia.dataset.Product:0")]]></screen>
+
+    <para>A reference provides access parts of the product as well as
+      access to the product itself:</para>
+    <screen><![CDATA[
+print reference.urn
+# urn:simple.default:herschel.ia.dataset.Product:0
+
+print reference.type
+# herschel.ia.dataset.Product
+
+meta=reference.meta
+print meta["creator"]
+# Me
+
+product=reference.product
+print product.creator
+# Me]]></screen>
+  </section>
+
+  <section id="herschel.ia.pal.urm-example.query">
+    <title>Querying</title>
+
+    <para>To be written</para>
+  </section>
+
+
+</section>
+

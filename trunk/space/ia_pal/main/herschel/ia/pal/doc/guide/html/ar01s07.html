@@ -1,0 +1,121 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>7.&nbsp;Associating Products: Contexts</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s06.html" title="6.&nbsp;Storing products: ProductStorage and ProductPool"><link rel="next" href="ar01s08.html" title="8.&nbsp;Product Cloning"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">7.&nbsp;Associating Products: Contexts</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s06.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s08.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="context"></a>7.&nbsp;Associating Products: Contexts</h2></div></div></div><p>
+It is often the case that products need to be grouped, and their common grouping made persistent.
+The PAL provides for this by introducing a special Product called Context. 
+The Context class itself is an abstract subclass of Product. 
+The Context class needs to be further subclassed in order to be used.
+There are two standard Contexts provided: ListContext and MapContext
+
+A class diagram showing these classes and their relation is provided in <a href="ar01s07.html#figure-context" title="Figure&nbsp;2.&nbsp;Class diagram for the classes related to Contexts">Figure&nbsp;2, &ldquo;Class diagram for the classes related to Contexts&rdquo;</a>.
+
+<div class="figure"><a name="figure-context"></a><div class="mediaobject" align="center"><img src="../images/PAL-Contexts.png" align="middle" alt="Class diagram for the classes related to Contexts"></div><p class="title"><b>Figure&nbsp;2.&nbsp;Class diagram for the classes related to Contexts</b></p></div>
+
+</p><p>
+The standard Contexts are discussed in the next few sections.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="listcontext"></a>7.1.&nbsp;ListContext: for accessing products by number</h3></div></div></div><p>
+The ListContext is a subclass of Context in which a list of references is kept. 
+The product (via its ProductRef) is obtained via its index in the list, and products can be added at a specific index in the list. 
+
+<pre class="screen">
+productRef1 = storage.save(product1)
+productRef2 = storage.save(product2)
+c = ListContext()
+c.refs.add(productRef1)
+c.refs.add(productRef2)
+print c.refs[0].urn # urn of product 1
+print c.refs[1].urn # urn of product 2
+</pre>
+
+Note that the addition operation is in fact an insertion, 
+and the previous product at the index in question and the following products in the list are shifted by one index 
+to accommodate the new product.
+Note that the ProductRefs can also refer to another context, and not just a product, 
+so that multiple contexts can be effectively linked.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="mapcontext"></a>7.2.&nbsp;MapContext: for accessing products by key</h3></div></div></div><p>
+The MapContext is another form of context in which the ProductRefs are accessed via a key of type String.
+When inserting a new Product (via its ProductRef) 
+into this Context, the developer should be aware if there is an existing ProductRef already at that key,
+that ProductRef will be replaced by the new ProductRef.
+
+<pre class="screen">
+productRef1 = storage.save(product1)
+productRef2 = storage.save(product2)
+c = MapContext()
+# Insert products into the MapContext
+c.refs.put('x', productRef1)
+c.refs.put('y', productRef2)
+print c.refs['x'].urn # urn of product 1
+print c.refs['y'].urn # urn of product 2
+
+# Now replace ProductRef at key 'x' with productRef3
+productRef3 = storage.save(product3)
+c.refs.put('x', productRef3)
+print c.refs['x'].urn # urn of product 3
+</pre>
+
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="rules"></a>7.3.&nbsp;What can or cannot be added to a context - Rules</h3></div></div></div><p>
+Contexts can be constrained by having a Rule defined for products which are added - the default 
+allows any product to be added to the context. This can be defined by the user to allow, for example, 
+only a particular product sub-class to be added, or a chack to make sure that no child product already exists 
+in the context with a given metadata keyword.
+Rules are built using Predicates, and Rules can be combined together using 'and' and 'or' constructs. 
+If an attempt is made to add a product which does not conform to the rule, a ContextRuleException is thrown.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="context-tree-update"></a>7.4.&nbsp;Updating a context 'tree'</h3></div></div></div><p>
+When a context is saved (assuming that the context implementation is written correctly),
+ the changes that are made in its child contexts are automatically saved as well.
+</p><p>
+This works as follows. The PAL facilitates this by requiring that any context should 'announce' when it has been modified in-memory - 
+or 'dirty'- by
+calling its dirty() method. Other objects needing to know if that context is modified in memory or otherwise would call the context's isDirty() method.
+</p><p>
+In the case of a parent context, on saving the isDirty() methods of its child contexts are called. 
+If any of those calls results in false, the corresponding child context is saved:
+
+<pre class="screen">
+# Create the child context first
+c_child=MapContext()
+
+# Create an in-memory ProductRef to this child context
+productRef1=ProductRef(c_child)
+c_parent=ListContext()
+
+# Insert child into parent
+c_parent.refs.add(productRef1)
+
+storage.save(c_parent) # c_parent and c_child automatically saved
+
+# Now modify child
+c_child.creator='changed' 
+
+# Save context 
+storage.save(c_parent) # modified c_child (and c_parent) saved
+</pre>
+
+</p><p>
+There is one issue in this design however, and that is to do with 'leaf' (non-context) products. 
+Such products do not have an isDirty() method, so it is not possible for a parent Context to 
+ascertain whether such child Product has been modified in memory or otherwise:
+
+<pre class="screen">
+leaf_child=Product()
+
+productRef1=ProductRef(leaf_child)
+c_parent=ListContext()
+
+c_parent.refs.add(productRef1)
+
+storage.save(c_parent) # c_parent and c_child automatically saved
+
+# Now modify child
+leaf_child.creator='changed'
+storage.save(c_parent) # c_parent and c_child NOT saved
+</pre>
+
+
+</p><p>
+The safest recommendation is to <span class="emphasis"><em>always save leaf products 
+explicitly after every modification</em></span>.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="tips"></a>7.5.&nbsp;Tips for using Contexts</h3></div></div></div><p>
+<div class="itemizedlist"><ul type="disc"><li><p>Contexts are meant to be lightweight access;
+don't overload them with data.</p></li><li><p>Use the standard contexts of ListContext and MapContext where necessary</p></li><li><p>Try to save products/contexts as soon as possible - try not to rely on context doing this work (see <a href="ar01s07.html#context-tree-update" title="7.4.&nbsp;Updating a context 'tree'">Section&nbsp;7.4, &ldquo;Updating a context 'tree'&rdquo;</a>). 
+In future support may be more robust.</p></li></ul></div>
+</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s06.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s08.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.&nbsp;Storing products: ProductStorage and ProductPool&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;8.&nbsp;Product Cloning</td></tr></table></div></body></html>

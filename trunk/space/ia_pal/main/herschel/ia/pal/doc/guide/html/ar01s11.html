@@ -1,0 +1,52 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>11.&nbsp;Pool locking mechanism</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s10.html" title="10.&nbsp;Pool evolution tool"><link rel="next" href="ar01s12.html" title="12.&nbsp;Querying for products"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">11.&nbsp;Pool locking mechanism</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s10.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s12.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="locking"></a>11.&nbsp;Pool locking mechanism</h2></div></div></div><p>
+When many processes are accessing the same pool at the same time, it is
+possible to have collisions, so that one process overrides changes made by another one.
+</p><p>
+It also may be the case that many processes are accessing the same pool, while working
+with different products, so that collisions would not be expected in principle.
+However, even in this case, if the different processes are associating tags to products,
+they are implicitly modifying the internal TagsProduct concurrently.
+</p><p>
+In order to avoid this kind of collisions, there has been implemented a basic locking mechanism,
+at pool level.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="locking.guidelines"></a>11.1.&nbsp;Guidelines for developers</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="locking.no"></a>11.1.1.&nbsp;Non-concurrent access to a pool</h4></div></div></div><p>The defaults will work for you.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="locking.tagging"></a>11.1.2.&nbsp;Concurrent tagging</h4></div></div></div><p>
+You need either to:
+<div class="itemizedlist"><ul type="disc"><li>Set the property hcss.ia.pal.sharedMode to true; this is read at the start-up, or</li><li>Call ProductStorage.setSharedMode(true)</li></ul></div>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">The shared mode flag affects all product storages in the session.</td></tr></table></div>
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="locking.products"></a>11.1.3.&nbsp;Concurrent access to products</h4></div></div></div><p>
+Use the acquireLock() and releaseLock() methods on the target pool.
+Within these calls, you are the only allowed to modify the pool.
+</p><p>
+These calls can be nested, so that calling acquireLock() twice to a pool will
+require to call releaseLock() twice too, in order to effectively release it.
+</p><p>
+<div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Caution"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Caution]" src="../images/caution.gif"></td><th align="left">Caution</th></tr><tr><td valign="top" align="left">
+You must call pool.releaseLock() for each pool.acquireLock().
+This can be ensured by releasing the lock inside a finally block. For example:
+<pre class="screen">
+ProductStorage storage = new ProductStorage();
+ProductPool pool = SimplePool.getInstance("somePool");
+storage.register(pool);
+
+try {
+    pool.acquireLock();
+    Product p = storage.load(someUrn);
+    // modify p...
+    storage.save(p);
+}
+finally {
+    pool.releaseLock();
+}
+</pre></td></tr></table></div>
+</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="locking.serial"></a>11.2.&nbsp;Concurrency in serial pool</h3></div></div></div><p>
+In the current implementation of the PoolDaemon, the incoming requests are
+queued, and only one request is attended at a time. From this point of view,
+concurrency is assured for atomic operations.
+</p><p>
+However, the same problems commented above may arise when working with a serial
+pool. So the guidelines presented before applies the same way for this pool.
+</p><p>
+One more thing to bear in mind about the serial pool is that the PoolDaemon
+"knows" the process that acquired the lock, so that it only allows that
+particular process to release the lock.
+</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s10.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s12.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">10.&nbsp;Pool evolution tool&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;12.&nbsp;Querying for products</td></tr></table></div></body></html>

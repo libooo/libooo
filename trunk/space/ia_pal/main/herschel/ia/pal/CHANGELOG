@@ -1,0 +1,2577 @@
+$Id: CHANGELOG,v 1.279 2008/11/02 15:08:15 bli Exp $ 
+
+CHANGELOG
+
+D_IA_PAL_1_127 (2008-11-02) [BLI]
+---------------------------
+- SPR-5024:  new method remove(String urn, boolean recursive) was added in ProductStorage. 
+  When recursive  is true and the urn refer to an Context, all products linked to an Observation will be removed.
+- File affected: 
+	ProductStorage.java
+	test/CommonPalTestSet.java
+	test/ContextPalTestGroup.java
+
+D_IA_PAL_1_126 (2008-10-20) [BLI]
+---------------------------
+- D-tag of previous changes.
+
+PRIVATE_IA_PAL_1_125_B (2008-10-20) [BLI]
+---------------------------
+- Add checkUrn() method in UrnUtils.java, throw an IllegalArgumentException if the identifier is not a legal URN.    
+- Add UrnUtils.checkUrn(urn) in the beginning of ProductStorage.setTag()
+- File affected: 
+	util/UrnUtils.java
+	ProductStorage.java
+
+
+PRIVATE_IA_PAL_1_125_A (2008-10-20) [BLI]
+---------------------------
+- Temporarily comment out SPR-4539's test cases, util an effective test approach implemented.    
+- File affected: 
+	test/AbstractStorageManagerTest.java
+	test/AbstractPoolManagerTest.java
+
+D_IA_PAL_1_125 (2008-10-09) [BLI]
+---------------------------
+- D-tag of previous changes.
+- Add test case for SPR-5207: ProductPool.meta(String) should return NoSuchElementException if the urn does not exist
+- File affected:   	
+	test/CommonPalTestSet.java
+	test/MetaPalTestGroup.java
+
+PRIVATE_IA_PAL_1_124_A (2008-10-09) [JSS]
+----------------------
+- SPR-4589: HashCoder uses DigestOutputStream instead of ByteArrayOutputStream
+  for generting the hash code. This avoids the need of having memory available
+  for double the product's size.
+- File affected:   	
+  * Modified:
+        util/HashCoder.java
+
+D_IA_PAL_1_124 (2008-10-07) [BLI]
+---------------------------
+- SPR-4539: The method name getIDList() is not following the 
+  naming convention, set deprecated. A new method getIdList() added.
+- File affected:   	
+	PoolManager.java
+	StorageManager.java
+	test/AbstractStorageManagerTest.java
+	test/AbstractPoolManagerTest.java
+
+D_IA_PAL_1_123 (2008-10-06) [BLI]
+---------------------------
+- Fix bug in jake.config and test.defaults
+- File affected:   	
+	managers/jake.config
+	managers/test.defaults
+
+D_IA_PAL_1_122 (2008-09-27) [BLI]
+---------------------------
+- Fix SPR-4252: Circular dependencies on pools
+  Caused by:
+  	herschel.ia.pal.managers.PoolManagerTest
+   	herschel.ia.pal.managers.StorageManagerTest
+  Refactoring: 
+  	Create a different test for each pool. These test check that, for each pool type
+  	P, the configured P can be retrieved calling the PoolManager.
+  	Apply also to StorageManagerTest. 
+- File affected:   	
+	Modified Files:
+	   StorageManager.java
+       AllTests.java
+	Added Files:
+       AbstractPoolManagerTest.java 
+       AbstractStorageManagerTest.java
+	Removed Files:
+       pool-b.xml 
+       pool-a.xml 
+       poolWithError2.xml 
+       store-hab.xml
+       store-devel.py 
+       StorageManagerTest.java 
+       pool-c.xml
+       store-production.xml 
+       testpoolconfig.xml 
+       teststorageconfig.xml
+       pool-standard.py 
+       PoolManagerTest.java 
+       poolWithError1.xml
+       store-standard.py 
+       poolWithError3.xml
+
+D_IA_PAL_1_121 (2008-09-19) [BLI]
+---------------------------
+- Fix SPR-4539: Applies for PoolManager.
+- File affected: 
+	PoolManager.java
+	test/PoolManagerTest.java
+
+D_IA_PAL_1_120 (2008-09-17) [BLI]
+---------------------------
+- Fix the leftover of SCR-4416, replace the deprecated code:
+		Deprecated code                    Replacement
+		---------------                    -----------
+		herchel.ia.pal.rule.MapKeyPresent  herchel.ia.pal.rule.ImmutableMapKey
+		herchel.ia.pal.rule.AliasPresent   herchel.ia.pal.rule.ImmutableAlias
+- File affected:
+  	M rule/ImmutableAlias.java
+
+
+D_IA_PAL_1_119 (2008-09-12) [BLI]
+---------------------------
+- Fix SPR-4539: Pool and Storage managers only provide named pools in memory.
+  getIDList() method is added to return all the string representation of the 
+  configured stores without initializing any of them
+- File affected: 
+	StorageManager.java
+	test/StorageManagerTest.java
+
+D_IA_PAL_1_118 (2008-09-12) [BLI]
+---------------------------
+- Make the VersionPalTestGroup compatible with the modification in lstore for
+  SPR-4943	Directory created when querying non-existent pool
+- File affected:
+  M test/VersionPalTestGroup.java
+
+D_IA_PAL_1_117 (2008-09-12) [BLI]
+---------------------------
+- SCR-4416	Removal of some deprecated code in PAL
+	Deprecated code                    Replacement
+	---------------                    -----------
+	ProductStorage.getProductPools     ProductStorage.getPools
+	ProductPool.load                   ProductStorage.load
+	Context.getVersions                ProductStorage.getVersions
+	Context.getContextVersions         ProductStorage.getVersions
+	Context.getStorage (protected)     -no replacement-
+	herchel.ia.pal.util.Pair           herchel.share.util.Pair
+	herchel.ia.pal.rule.MapKeyPresent  herchel.ia.pal.rule.ImmutableMapKey
+	herchel.ia.pal.rule.AliasPresent   herchel.ia.pal.rule.ImmutableAlias
+- File affected:
+	M /herschel/ia/pal/Context.java 
+	M /herschel/ia/pal/ProductPool.java 
+	M /herschel/ia/pal/ProductStorage.java
+	M /herschel/ia/pal/util/SynchronizedPool.java
+	M /test/herschel/ia/pal/managers/StorageManagerTest.java
+	R /herschel/ia/pal/util/Pair.java
+	R /herschel/ia/pal/rule/AliasPresent.java 
+	R /herschel/ia/pal/rule/MapKeyPresent.java
+
+D_IA_PAL_1_116 (2008-08-28) [BLI]
+---------------------------
+- SCR-4428, Flood of messages pollute command line. A property hcss.ia.pal.sizecalculation.depresswarning is added. W
+hen it was set to true, the message is in level FINE.  When it was set to false,
+ the message is in level WARNING. The default value is true.
+
+- File affected:
+	defns/pal.xml
+	ProductRef.java
+
+D_IA_PAL_1_115 (2008-08-20) [BLI]
+---------------------------
+- SCR-4311, the javadoc of StorageManager.getDefault() and PoolManager.getDefault() updated
+and the two methods were marked as deprecated.
+- File affected:
+	StorageManager.java
+	PoolManager.java
+    
+
+D_IA_PAL_1_114 (2008-08-11) [BLI]
+---------------------------
+- D-tag of previous changes.
+
+
+PRIVATE_IA_PAL_1_113_A (2008-08-09) [SCHEN]
+---------------------------
+- Scr4222, add a new syntax of Query parser: meta['keyword']='abc'
+  to avoid the name conflict between variable names and meta keywords.
+- File affected:
+	main/herschel/ia/pal/query/parser/jython/parser.py
+	test/herschel/ia/pal/query/PalApiTest.py
+
+
+D_IA_PAL_1_113 (2008-08-01) [BLI]
+---------------------------
+- D-tag of previous changes.
+- Fix for SCR-4565(ProductVisitor called before commit of Product) committed by pbalm.
+Note: The changes in files for this SCR was merged during D_IA_PAL_1_112 to PRIVATE_IA_PAL_1_112_E.
+i.e. The changes can not be rollbacked separately.  
+- Files affected:
+	ProductStorage.java
+	ProductVisitor.java
+	Context.java 
+	ListContext.java 
+	MapContext.java
+
+
+PRIVATE_IA_PAL_1_112_E (2008-07-30) [BLI]
+---------------------------
+- Fix for SPR-4590: Free the product in the returned reference in ProductStorage.save
+- Files affected:
+	ProductStorage.java
+	CommonPalTestGroup.java
+	WhiteBoxPalTestGroup.java
+
+PRIVATE_IA_PAL_1_112_D (2008-07-30) [BLI]
+---------------------------
+- Fix for SPR-4311: The javadoc of StorageManager and PoolManager updated.
+- Files affected:
+	StorageManager.java
+	PoolManager.java
+
+PRIVATE_IA_PAL_1_112_C (2008-07-28) [BLI]
+---------------------------
+- Fix for SPR-4423: The size calculation is implemented as a Visitor to the save operation
+- package herschel.ia.pal.size will be deprecated later
+- Files affected:
+	util/SizeCalculator.java
+	util/SizeCalculatorTest.java
+	AllTests.java
+	ProductRef.java
+	util/size/Sizeof.java
+	util/size/ObjectProfiler.java
+
+
+PRIVATE_IA_PAL_1_112_B (2008-07-22) [BLI]
+---------------------------
+- Roll back the fix for SPR 4539. Wait for final decision on what getStorageMap should do.
+- Files affected:
+	StorageManager.java
+	managers/StorageManagerTest.java
+
+
+PRIVATE_IA_PAL_1_112_A (2008-07-22) [BLI]
+---------------------------
+- Fix for SPR 4539: Adding init() in StorageManager to read and load all configured storage.
+- Files affected:
+	StorageManager.java
+	managers/StorageManagerTest.java
+	
+
+D_IA_PAL_1_112 (2008-07-01) [SG]
+---------------------------
+- D-tag of previous changes.
+
+PRIVATE_IA_PAL_1_111_A (2008-06-24) [PB]
+----------------------
+- Fix for SPR 4316: Adding try-catch around call to
+  ProductStorage.getVersions in PoolSchemaEvolver,
+  as suggested in SPR.
+- Update in ProductRef: Catching general Exception when
+  calling getTotalSize on possible Context children, instead
+  of NullPointerException.
+  * Modified:
+        PoolSchemaEvolver.java
+        ProductRef.java
+
+D_IA_PAL_1_111 (2008-06-23) [BLI]
+---------------------------
+- D-tag of previous changes.
+
+PRIVATE_IA_PAL_1_110_B (2008-06-23) [JSS]
+----------------------
+- Fix for bug in cloning mechanism in MapContext and ListContext: in some
+  cases, the storage of a child reference was not updated to the target storage.
+- Saving a reference to a product whose size is not already computed forces the
+  storage to compute it.
+- Files affected:
+  * Modified: 
+        ListContext.java
+        MapContext.java
+        ProductRef.java
+        StoredVersionHandler.java
+
+PRIVATE_IA_PAL_1_110_A (2008-06-13) [BLI]
+---------------------------
+- Bugfix: SPR-4388 check exists before load
+- Files affected:
+  * Modified: 
+  		AbstractProductPool.java
+
+D_IA_PAL_1_110 (2008-06-08) [BLI]
+---------------------------
+- D-tag of previous changes.
+- Http pool included(will be moved to ia_pal_pool_http module when ready).
+
+PRIVATE_IA_PAL_1_109_B (2008-06-06) [JSS]
+-----------------------------------
+- Some changes in implementation code for improving performance.
+- Files affected:
+  * Modified:
+        BasicStorageQueryVisitor.java
+        ProductRef.java
+
+PRIVATE_IA_PAL_1_109_A (2008-05-30) [JSS]
+-----------------------------------
+- Fix for SPR-4340.
+- VersionHandler and TagsHandler refactored. New method
+  VersionHandler.save(ref, boolean) for avoiding an unnecessary check if a
+  product doesn't exist in the target pool, so some (innocuous) exceptions
+  printed in the PoolDaemon are avoided.
+- Files affected:
+  * Added:
+        HandlerFactory.java
+        IgnoreVersionHandler.java
+        MemoryTagsHandler.java
+        StoredTagsHandler.java
+        StoredVersionHandler.java
+  * Deleted:
+        MemoryTagging.java
+        NoVersions.java
+        VersionFactory.java
+  * Modified:
+        Context.java
+        ProductRef.java
+        ProductStorage.java
+        TagsHandler.java
+        VersionHandler.java
+
+D_IA_PAL_1_109 (2008-05-21) [JSS]
+---------------------------
+- Fix for SPR-4299.
+- Minor improvements in Javadoc comments of ProductStorage.
+- Files affected:
+  * Modified:
+        AbstractProductPool.java
+        ProductStorage.java
+
+D_IA_PAL_1_108 (2008-05-19) [JSS]
+---------------------------
+- MapContext and ListContext build the pointed ProductRefs directly with
+  ProductRef constructor, instead of calling ProductStorage.load(urn), which
+  requires an additional exists call.
+- Performance tests are not run automatically within the units tests, as they
+  are to be run under request, for generating specific reports. This saves time
+  when executing PAL pool tests.
+- Files affected:
+  * Added:
+        performance/LoggerPool.java
+  * Modified:
+        ListContext.java
+        MapContext.java
+        CommonPalTestSet.java
+
+D_IA_PAL_1_107 (2008-05-15) [JSS]
+---------------------------
+- D-tag of previous changes.
+- Two more convenience constructors added to ProductStorage, and test
+  harnesses for the new constructors added.
+- Files affected:
+  * Modified:
+        ProductStorage.java
+        BasicPalTestGroup.java
+        CommonPalTestSet.java
+
+PRIVATE_IA_PAL_1_106_B (2008-05-14) [JSS]
+-----------------------------------
+- Fix for SPR-4234.
+- ProductPool.loadDescriptors added.
+- ProductPool.load deprecated, as it's not needed by ProductStorage now.
+- AbstractProductPool.load added, as convenience method for derived classes.
+- Convenience constructor and register method added to ProductStorage, for
+  registering pools at once.
+- Temporary pool used by PoolSchemaEvolver is now lstore, instead of simple,
+  since SimplePool is deprecated.
+- Files affected:
+  * Modified:
+  (main branch)
+        AbstractProductPool.java
+        ProductPool.java
+        ProductRef.java
+        ProductStorage.java
+        VersionHandler.java
+        util/PoolSchemaEvolver.java
+        util/SynchronizedPool.java
+        util/UrnUtils.java
+  (test branch)
+        BasicPalTestGroup.java
+        ProductRefPalTestGroup.java
+        VersionPalTestGroup.java
+        performance/LatencyPool.java
+
+PRIVATE_IA_PAL_1_106_A (2008-05-05) [JSS]
+-----------------------------------
+- Fix for SPR-4151. Specific test for this SPR added to VersionPalTestGroup.
+- Files affected:
+  * Modified:
+        ProductStorage.java
+        VersionHandler.java
+        util/UrnUtils.java
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+
+D_IA_PAL_1_106 (2008-05-08) [BLI]
+-----------------------------------
+- Add an util to allow users to execute a query and cancel it if needed.
+- Files affected:
+	* Added: 
+		util/CancelableQueryExecuter
+	* The testcase was put on lstore module to avoid circular dependencies.	
+
+PRIVATE_IA_PAL_1_105_A (2008-05-05) [JSS]
+-----------------------------------
+- Update design guide and developer documentation with explicit information
+  about the behaviour of ProductRef when loading the referenced Product: it's
+  not kept in memory, unless it is a Context.
+- Files affected:
+  * Modified:
+        doc/design/html/ar01s04.html
+        doc/design/html/ar01s07.html
+        doc/design/html/ar01s09.html
+        doc/design/xml/pal-design.xml
+        doc/guide/html/ar01s03.html
+        doc/guide/html/ar01s06.html
+        doc/guide/xml/pal-guide.xml
+
+D_IA_PAL_1_105 (2008-04-30) [JSS]
+---------------------------
+- Put back changes from D_IA_PAL_99 to D_IA_PAL_102 on top of D_IA_PAL_1_104.
+- Files affected:
+  * Added:
+        managers/jython/JythonConfigReader.java
+  * Deleted:
+        managers/StorageConfigReaderFactory.java
+        managers/StorageManagerUtils.java
+  * Modified:
+        StorageManager.java
+        doc/index.html
+        doc/guide/html/ar01s03.html
+        managers/PoolCreatorFactory.java
+        managers/StorageConfigReader.java
+        managers/jython/JythonPoolConfigReader.java
+        managers/jython/JythonStorageConfigReader.java
+        managers/xml/XmlStorageConfigReader.java
+        query/Query.java
+        query/package.html
+
+D_IA_PAL_1_104 (2008-04-30) [JSS]
+---------------------------
+- Patch for user release 0.6.2 with changes requested by HIFI and PACS:
+  * SPR-4172: more logging info, avoid warnings in DbPool, fix VException.
+  * SPR-4009: roll it back to previous behaviour.
+- Addition to D_IA_PAL_1_103: Test harnesses for ProductRef.getProduct().
+- NOTE: Changes from D_IA_PAL_99 to D_IA_PAL_102 still rolled back in this tag.
+- Files affected:
+  * Added:
+        ProductRefPalTestGroup.java
+  * Deleted:
+        DescriptorsPalTestGroup.java
+  * Modified:
+        AttributePalTestGroup.java
+        CommonPalTestSet.java
+
+D_IA_PAL_1_103 (2008-04-30) [JSS]
+---------------------------
+- Patch for user release 0.6.2 with changes requested by HIFI and PACS:
+  * SPR-4172: more logging info, avoid warnings in DbPool, fix VException.
+  * SPR-4009: roll it back to previous behaviour.
+- This change comes along with corresponding changes in pool.db and pool.cache,
+  with tags D_IA_PAL_POOL_DB_1_51 and D_IA_PAL_POOL_CACHE_1_29.
+- NOTE: Changes from D_IA_PAL_99 to D_IA_PAL_102 are rolled back in this tag.
+- Files affected:
+  * Added:
+        managers/StorageConfigReaderFactory.java
+        managers/StorageManagerUtils.java
+  * Deleted:
+        managers/jython/JythonConfigReader.java
+  * Modified:
+        AbstractProductPool.java
+        ProductRef.java
+        ProductStorage.java
+        StorageManager.java
+        doc/index.html
+        doc/guide/html/ar01s03.html
+        managers/PoolCreatorFactory.java
+        managers/StorageConfigReader.java
+        managers/jython/JythonPoolConfigReader.java
+        managers/jython/JythonStorageConfigReader.java
+        managers/xml/XmlStorageConfigReader.java
+        query/Query.java
+        query/package.html
+
+D_IA_PAL_1_102 (2008-04-30) [BLI]
+-------------------------
+- D-tag of previous changes.
+
+PRIVATE_IA_PAL_1_101_B (2008-04-30) [SCHEN]
+---------------------------
+- SPR-4025: update UM URL in the documents
+Modified:
+	doc/index.html 
+	doc/guide/html/ar01s03.html
+	
+PRIVATE_IA_PAL_1_101_A (2008-04-29) [PB]
+---------------------------
+- PerformancePalTestGroup: Adding benchmarks for PAL/HAIO performance test and
+  others. These can be but are currently not run as unit tests during the
+  build.
+- TestProductGenerator: In fillPoolSmarterProducts, save first product with
+  tag testTag. This can be used to quickly retrieve one product and determine
+  the size of the products in the pool. Convenient when running benchmarks but
+  if tags have to go- not essential and can in principle be removed again.
+- AbstractBenchmark: Switch from setting total pool size plus # of products,
+  to product size and # products.
+- ResultSet: Adding CSV output and fixing some format problems.
+
+Modified Files:
+	PerformancePalTestGroup.java 
+	TestProductGenerator.java 
+	AbstractBenchmark.java 
+	ResultSet.java 
+
+
+
+D_IA_PAL_1_101 (2008-04-28) [BLI]
+---------------------------
+- Update query doc(for SPR-4112)
+- Files affected:
+	Modified Files:
+		Query.java
+		package.html	
+
+
+
+D_IA_PAL_1_100 (2008-04-25) [SG]
+---------------------------
+
+- SPR-4046: Removed hcss.ia.pal.pool.poollocation
+- SPR-4169: StoreManager not loading pools
+- SPR-4197: Jython namespace pollution by managers
+- SPR-4211: Load default files from resource
+
+Modified Files:
+ 	CHANGELOG StorageManager.java defns/pal.xml 
+ 	managers/PoolCreatorFactory.java 
+ 	managers/jython/JythonPoolConfigReader.java 
+ 	managers/jython/JythonStorageConfigReader.java 
+ 	managers/xml/XmlStorageConfigReader.java 
+Added Files:
+ 	managers/jython/JythonConfigReader.java 
+Removed Files:
+ 	managers/StorageConfigReaderFactory.java 
+ 	managers/StorageManagerUtils.java 
+
+D_IA_PAL_1_99
+-------------
+PRIVATE_IA_PAL_1_98_A (2008-04-15) [JSS]
+---------------------
+- Fix of SPR-4158: additional checks in UrnUtils.getClass so the class name
+  stated in the urn belongs to a derivative of Product.
+- Fix of SPR-4138.
+- Files affected:
+  * Modified:
+        util/UrnUtils.java
+        util/UrnUtilsTest.java
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+
+D_IA_PAL_1_98 (2008-04-10) [BLI]
+-------------------------
+- D-tag of previous changes.
+
+PRIVATE_IA_PAL_1_97_A (2008-04-10) [SCHEN]
+-------------
+- SPR-4137: roll back the changes SCR-3335,
+	which removed the 'simple.' prefix in the poolID of SimplePool
+- Files affected:
+  * Modified:
+	SimplePool.java
+	UrnUtils.java
+	PoolSchemaEvolver.java	
+	SimplePoolCompatibilityTest.java
+
+D_IA_PAL_1_97 (2008-04-09) [JSS]
+-------------
+- Improvements in Javadoc documentation.
+- Files affected:
+  * Modified:
+        ProductRef.java
+        ProductStorage.java
+
+D_IA_PAL_1_96 (2008-04-08) [JSS]
+-------------
+- Improvements in Javadoc documentation.
+- Files affected:
+  * Modified:
+        ProductRef.java
+        ProductStorage.java
+
+D_IA_PAL_1_95 (2008-04-03) [JSS]
+-------------
+- D-tag of previous changes.
+- Unused imports removed from JythonInterpretor, and matches method doesn't
+  use generics, for simplicity.
+- Files affected:
+  * Modified:
+        JythonInterpretor.java
+
+PRIVATE_IA_PAL_1_94_H (2008-04-02) [PB, JSS]
+---------------------
+- Computation of the total size descriptor for contexts.
+- Changes in ProductStorage and VersionHandler to improve compatibility of the
+  new versioning mechanism with existing pools.
+- JythonInterpretor manages an instance that is unique per thread, through a
+  ThreadLocal variable.
+- QUERY_ALL constant added to StorageQuery.
+- Files affected:
+  * Added:
+        versioning/VersionLoader.java
+  * Modified:
+        JythonInterpretor.java
+        ProductRef.java
+        ProductStorage.java
+        VersionHandler.java
+        query/StorageQuery.java
+        util/PoolSchemaEvolver.java
+        CommonPalTestSet.java
+        DescriptorsPalTestGroup.java
+        VersionPalTestGroup.java
+
+PRIVATE_IA_PAL_1_94_G (2008-04-01) [JSS]
+---------------------
+- PoolManager back to previous version.
+- Files affected:
+  * Modified:
+        PoolManager.java
+
+PRIVATE_IA_PAL_1_94_F (2008-03-31) [JSS]
+---------------------
+- New versioning and tagging implementation (delegated to pools), addition of
+  descriptors, as well as some other changes due to API review and utilities.
+- Files affected:
+  (main branch)
+  * Added:
+        AbstractProductPool.java
+        ProductVersion.java
+        TagsHandler.java
+        VersionHandler.java
+        util/ClassComparator.java
+        util/HerschelNames.java
+        util/Util.java
+        versioning/TagsLoader.java
+  * Deleted:
+        PalAdmin.java
+        ProductPoolComparator.java
+        VersionTrackHandler.java
+        versioning/VersionLoader.java
+  * Modified:
+        BasicStorageQueryVisitor.java
+        Context.java
+        JythonInterpretor.java
+        ListContext.java
+        MapContext.java
+        MemoryTagging.java
+        NoVersions.java
+        PoolManager.java
+        ProductPool.java
+        ProductRef.java
+        ProductStorage.java
+        StorageManager.java
+        Taggable.java
+        VersionFactory.java
+        Versionable.java
+        query/__init__.py
+        util/ArraySet.java
+        util/FileUtil.java
+        util/PoolSchemaEvolver.java
+        util/SynchronizedPool.java
+        util/TimedLock.java
+        util/UrnUtils.java
+        versioning/AbstractVersionProduct.java
+        versioning/ProductCombinedType.java
+        versioning/TagsProduct.java
+        versioning/VersionTrackInfo.java
+        versioning/VersionTrackProduct.java
+  (test branch)
+  * Added:
+        DescriptorsPalTestGroup.java
+        util/AllTests.java
+        util/UrnUtilsTest.java
+        util/UtilTest.java
+  * Modified:
+        AbstractPalTestCase.java
+        AllTests.java
+        BasicPalTestGroup.java
+        CloningPalTestGroup.java
+        CommonPalTestSet.java
+        ContextPalTestGroup.java
+        PerformancePalTestGroup.java
+        RemovePalTestGroup.java
+        TestProductGenerator.java
+        VersionPalTestGroup.java
+        browser/test/utils/DelayedPool.java
+        browser/test/utils/DummyPool.java
+        performance/LatencyPool.java
+        performance/ResultSet.java
+        util/TimedLockTest.java
+
+PRIVATE_IA_PAL_1_94_E (2008-03-28) [JSS]
+---------------------
+- Design document updates for the near delivery of versioning enhancements
+  and descriptors.
+- Files affected:
+  * Added:
+        doc/design/index.js
+        doc/guide/index.js
+  * Modified:
+        index.js
+        doc/design/html/ar01s02.html
+        doc/design/html/ar01s03.html
+        doc/design/html/ar01s04.html
+        doc/design/html/ar01s05.html
+        doc/design/html/ar01s06.html
+        doc/design/html/ar01s07.html
+        doc/design/html/ar01s08.html
+        doc/design/html/ar01s09.html
+        doc/design/html/ar01s10.html
+        doc/design/html/pal-design.html
+        doc/design/images/PAL-ProductStoragePool.png
+        doc/design/images/PAL-ProductStoragePool.violet
+        doc/design/xml/pal-design.xml
+        doc/guide/html/ar01s10.html
+        doc/guide/html/ar01s12.html
+        doc/guide/xml/pal-guide.xml
+
+PRIVATE_IA_PAL_1_94_D (2008-03-20) [SG]
+-------------
+
+- Consistently throw ConfigurationException for pool configuration problems
+
+PRIVATE_IA_PAL_1_94_C (2008-03-20) [SG]
+-------------
+
+- Refactoring (round 2) of PoolManager, now meets specification in PalBehaviour. Some test harnesses
+  removed that were tightly coupled to the actual implementation.
+
+PRIVATE_IA_PAL_1_94_B (2008-03-14) [PB]
+-------------
+- Various minor changes to performance package in test tree.
+- Files affected:
+        M ResultSet.java
+        M AbstractBenchmark.java
+        M TestProductGenerator.java 
+        M PerformancePalTestGroup.java 
+
+
+PRIVATE_IA_PAL_1_94_A (2008-03-10) [BLI]
+-------------
+- A synchronized wrapper for ProductPool added.
+- Files affected:
+	A /main/herschel/ia/pal/util/SynchronizedPool.java
+
+D_IA_PAL_1_94 (2008-02-27) [BLI]
+-------------
+- D-tag of previous change.
+- Add MultiThreadedTestCase.java in test.
+
+PRIVATE_IA_PAL_1_93_E (2008-02-26) [SG]
+-------------
+- Updated rule subpackage after reviewing it
+
+-------------
+- HashCoder utility class, for providing an MD5 code for any object.
+- Files affected:
+  * Added:
+        util/HashCoder.java
+        util/HashCoderTest.java
+
+PRIVATE_IA_PAL_1_93_C (2008-02-22) [SG]
+-------------
+
+- LinkedHashSet -> ArraySet in VersionTrackHandler, ListContext, MapContext
+
+PRIVATE_IA_PAL_1_93_B (2008-02-14) [PB]
+-------------
+- Small enhancement to AbstractBenchmark to facilitate SerialPoolBenchmark
+  (dynmically setting property if property found in config file)
+
+PRIVATE_IA_PAL_1_93_A (2008-02-14) [BLI]
+-------------
+- Override assignment operator, e.g. query "instrument='spire'" 
+  will be the same as "instrument=='spire'"
+- Files affected:
+	M /main/herschel/ia/pal/query/Query.java
+	M /test/herschel/ia/pal/query/AllTests.java
+	A /test/herschel/ia/pal/query/QueryTest.java
+
+D_IA_PAL_1_93 (2008-02-12) [JSS]
+-------------
+- AbstractPoolSchemaEvolverTest overrides the value of the property
+  hcss.ia.pal.pool.simple.dir to var.hcss.workdir, because the access
+  from the tests harnesses to ${user.home}/.hcss directory is forbidden.
+- Files affected:
+  * Modified:
+        AbstractPoolSchemaEvolverTest.java
+
+D_IA_PAL_1_92 (2008-02-07) [JSS]
+-------------
+- Tests of Sizeof commented out temporarily, to let the build pass.
+- Files affected:
+  * Modified:
+        AllTests.java
+
+D_IA_PAL_1_91 (2008-02-07) [BLI]
+-------------
+- Add unzip(), copyFiles() methods in FileUtil.
+- Files affected:
+  * Modified:
+        /main/herschel/ia/pal/util/FileUtil.java
+
+D_IA_PAL_1_90 (2008-02-07) [BLI]
+-------------
+D-tag of previous change.
+
+PRIVATE_IA_PAL_1_89_A (2008-02-01) [JSS]
+---------------------
+- Javadoc of methods meta, load and remove of ProductPool specify that a
+  NoSuchElementException is thrown if the urn does not belong to the pool.
+- ProductStorage.load and remove methods throw a NoSuchElementException instead
+  of an IllegalArgumentException if the urn does not belong to any pool of the
+  storage.
+- Both changes are related to the solution of SPR-3869.
+- Files affected:
+  * Modified:
+        ProductPool.java
+        ProductStorage.java
+
+D_IA_PAL_1_89 (2008-01-25) [BLI]
+-------------
+- Get back the mistakenly commented '_jython.exec("from herschel.ia.numeric.all import *")' 
+- Files affected:
+  * Modified:
+  		M /main/herschel/ia/pal/JythonInterpretor.java
+
+D_IA_PAL_1_88 (2008-01-25) [BLI]
+-------------
+- Remove the not needed import
+- Files affected:
+  * Modified:
+        M /main/herschel/ia/pal/util/size/Sizeof.java
+
+D_IA_PAL_1_87 (2008-01-24) [BLI]
+-------------
+- Add TimedLock. A TimedLock wraps a lockable, and release the lock after specified time interval.
+Client could stop/start the timer it used. Each time the start called, the time interval will be 
+reset(i.e. not resumed).
+- Files affected:
+  * Modified:
+        A /main/herschel/ia/pal/util/TimedLock.java
+        A /test/herschel/ia/pal/util/TimedLockTest.java
+
+PRIVATE_IA_PAL_1_86_G (2008-01-22) [PB]
+-------------
+By mistake commented out tests that already existed before adding new ones
+during previous commit. Now enabling them again.
+
+PRIVATE_IA_PAL_1_86_F (2008-01-19) [PB]
+-------------
+- Adding herschel.ia.pal.util.size package for calculating Object size in
+memory, on an average JVM. The result is intended to be stored in the pools,
+to provide the users with an indication of "donwload size".
+
+PRIVATE_IA_PAL_1_86_E (2008-01-09) [JSS]
+-------------
+- Javadoc of AttribQuery class improved to fix SPR-3672.
+- Files affected:
+  * Modified:
+        util/PoolSchemaEvolver.java
+
+PRIVATE_IA_PAL_1_86_D (2008-01-09) [JSS]
+-------------
+- Javadoc of AttribQuery class improved to fix SPR-3719.
+- Files affected:
+  * Modified:
+        query/AttribQuery.java
+
+PRIVATE_IA_PAL_1_86_C (2007-12-27) [PB]
+-------------
+- For performance studies add new LatencyPool to test tree: This pool wraps a physical pool
+and introduces a 500 ms latency on all operation (simulating pool access
+across HTTP).
+- Add Update and UpdateTwice unit tests to PalPerformanceTestGroup
+- Some improvements to helper class ResultSet (provides benchmarking
+results)
+  * Modified:
+		M test/herschel/ia/pal/PerformancePalTestGroup.java
+		M test/herschel/ia/pal/performance/AbstractBenchmark.java
+		A test/herschel/ia/pal/performance/LatencyPool.java
+		M test/herschel/ia/pal/performance/ResultSet.java
+
+
+PRIVATE_IA_PAL_1_86_B (2007-12-21) [BLI]
+-------------
+- Appending a prefix to all created variables names( e.g. __pal_query_expr__)
+  during pal query parsing to avoid contaminate the global namespace.
+- Minor update to test harness  
+  * Modified:
+  		M main/herschel/ia/pal/query/parser/PALParser.java
+  		M test/herschel/ia/pal/PerformancePalTestGroup.java
+  		M test/herschel/ia/pal/queryPalApiTest.py
+  
+
+PRIVATE_IA_PAL_1_86_A (2007-12-19) [BLI]
+-------------
+- Changed JythonInterpretor back to using the same namespace with jide session.
+  This was changed in PRIVATE_IA_PAL_1_62_I by mistake, it will cause PAL Query don't 
+  work on some features that need aware of the jide namespace.
+  * Modified:
+  		M main/herschel/ia/pal/JythonInterpretor.java
+
+D_IA_PAL_1_86 (2007-11-30) [JSS]
+-------------
+- Fixed bug in versioning discovered in e2etest #3 of PACS with sharedMode.
+- Files affected:
+  * Modified:
+        VersionTrackHandler.java
+        VersionPalTestGroup.java
+        CommonPalTestSet.java
+
+D_IA_PAL_1_85 (2007-11-28) [JSS]
+-------------
+D-tag of previous change.
+
+PRIVATE_IA_PAL_1_84_A (2007-11-28) [JSS]
+---------------------
+- Fixed bug in versioning when the sharedMode is set.
+- Files affected:
+  * Modified:
+        VersionTrackHandler.java
+        VersionPalTestGroup.java
+        CommonPalTestSet.java
+
+D_IA_PAL_1_84 (2007-11-21) [JSS]
+-------------
+- Fixed bug when saving products without versioning information, that was
+  introduced with PRIVATE_IA_PAL_1_82_A.
+- Files affected:
+  * Modified:
+        VersionTrackHandler.java
+
+D_IA_PAL_1_83 (2007-11-21) [SG]
+-------------
+
+SPR-3761: initialise hcss.ia.pal.sharedMode
+Included PRIVATE_IA_PAL_1_82_A
+
+PRIVATE_IA_PAL_1_82_A (2007-11-20) [JSS]
+---------------------
+- Performance improvements: getting last versions of the products returned in
+  a query does not involve to load the corresponding VersionTrackProduct, thus
+  avoiding a MetaQuery for each. The VersionTrackProducts are only loaded when
+  really needed: for save and remove operations.
+- Context.dirty() protected method is deprecated, since making the urn null
+  is not a clean way to mark a Context as dirty. Context.refsChanged() method
+  added to cope with the case of making a Context dirty by adding or removing
+  references.
+- Files affected:
+  * Modified:
+        Context.java
+        ListContext.java
+        MapContext.java
+        ProductStorage.java
+        VersionTrackHandler.java
+        util/UrnUtils.java
+        versioning/VersionLoader.java
+        versioning/VersionTrackProduct.java
+        CloningPalTestGroup.java
+        VersionPalTestGroup.java
+
+D_IA_PAL_1_82 (2007-11-14) [SG]
+-------------
+
+SPR-3638: cope when no writable pool in xml file
+
+D_IA_PAL_1_81 (2007-11-13) [SG]
+-------------
+
+SCR-3692: check for null in ProductRef.toString
+More Javadoc tidy
+
+PRIVATE_IA_PAL_1_80_A (2007-11-13) [PB]
+-------------
+Adding AbstractPoolSchemaEvolverTest.
+	
+	* Modified:
+	A test/herschel/ia/pal/AbstractPoolSchemaEvolverTest.java
+	M test/herschel/ia/pal/CommonPalTestSet.java
+	M test/herschel/ia/pal/PerformancePalTestGroup.java
+	M test/herschel/ia/pal/performance/Timer.java
+
+D_IA_PAL_1_80 (2007-11-06) [SG]
+-------------
+
+Bug fix in VersionFactory
+Removed private implementation dependent tests in RemovePalTestGroup
+Checked class types in query package
+Turned off apparently illegal test dbpool:Spr2410SuperTest
+
+PRIVATE_IA_PAL_1_79_B (2007-11-07) [PB]
+---------------------
+- Adding test harness for PoolSchemaEvolver. Implemented as a PalTestGroup,
+  so that it can run during the testing of each of the pool
+  implementations. It does *not* test copying a pool from one type to
+  another (copying a DbPool to a LocalStore).
+  NOTE: It should not run for all pool types, the PoolSchemaEvolver only
+  works for db, simple and lstore!
+- Adding public String getPoolType() to AbstractPoolTestCase as abstract
+  method. Expected return types are "simple", "lstore", "db", etc.
+
+PRIVATE_IA_PAL_1_79_A (2007-11-07) [BLI]
+---------------------
+- Overrides toString() method of Query, returns the query string it constructs.
+	* Modified:
+		herschel/ia/pal/query/Query.java
+
+D_IA_PAL_1_79 (2007-11-06) [SG]
+-------------
+
+Fixed circular call ProductStorage.remove <-> VersionTrackHandler.remove
+
+D_IA_PAL_1_78 (2007-11-06) [SG]
+-------------
+
+Removed ProductSelector, missed last time
+More refactoring: introduced Versionable, Taggable, VersionFactory
+Introduced version strategy property hcss.ia.pal.version
+
+PRIVATE_IA_PAL_1_78_B (2007-11-01) [SG]
+---------------------
+
+Simplify, stage one:
+  M PalAdmin.java
+  R PersistenceLayer.java
+  M ProductRef.java
+  M ProductStorage.java
+  R RawPoolHandler.java
+  M VersionTrackHandler.java
+  M managers/jython/jake.config
+  R pool-standard.py
+  R store-standard.py
+  M defns/pal.xml
+
+Moved managers/utils classes into managers
+
+PRIVATE_IA_PAL_1_78_A (2007-10-31) [PB]
+---------------------
+- AbstractBenchmark: Allow specification of list of pool names to run benchmarks.
+- TestProductGenerator: When saving products, use ProductStorage interface.
+- PerformancePalTestGroup: Switch to ProductStorage and implement cache for list of URNs in current 	   pool. Retrieving all URNs can be very slow, if you have many products (10k).
+- AbstractPalTestCase: Remove final from MAX_POOLS member so subclasses can change it.
+  * Modified:
+    M test/herschel/ia/pal/AbstractPalTestCase.java
+    M test/herschel/ia/pal/PerformancePalTestGroup.java
+    M test/herschel/ia/pal/TestProductGenerator.java
+    M test/herschel/ia/pal/performance/AbstractBenchmark.java
+
+D_IA_PAL_1_78 (2007-10-26) [PB]
+---------------------
+- Reduced max number of pools again to 5, because it is a requirement from
+  the DbPool tests that it creates all possible databases (up to the max
+  number) before running any tests. At least it is required until we get a better
+  understanding of the problem.
+
+  * Modified:
+M test/herschel/ia/pal/AbstractPalTestCase.java
+
+
+PRIVATE_IA_PAL_1_77_A (2007-10-24) [PB]
+---------------------
+- Changes to performance benchmarking classes:
+  - Timer: add startImmediately to allow it to be inserted
+    in Bo's PerformancePalTestGroup. Normally it has a "sleep"
+    as a settle time.
+  - ResultSet: Adding implementation to output (LStore, Simple, ...)
+  - AbstractBenchmark and PerformancePalTestGroup:
+    Now using ProductStorage interface instead of ProductPool.
+    AbstractBenchmark runs off configuration file instead of cmd
+    line switches.
+    
+  * Modified:
+M test/herschel/ia/pal/PerformancePalTestGroup.java
+M test/herschel/ia/pal/performance/AbstractBenchmark.java
+M test/herschel/ia/pal/performance/ResultSet.java
+M test/herschel/ia/pal/performance/Timer.java
+
+
+D_IA_PAL_1_77 (2007-10-22) [SG]
+-------------
+
+Fixed poollocation property in pal.xml
+
+D_IA_PAL_1_76 (2007-10-18) [JSS]
+-------------
+
+Changed dataresources to resources in managers/jython
+
+PRIVATE_IA_PAL_1_75_E (2007-10-16) [PB]
+---------------------
+- Fixing compiler warnings (type-safety due to non-generic Class usage)
+  Just changed Class --> Class<? extends Object> for lack of better
+  understanding of the code.
+  * Modified:
+        rule/Alias.java
+        rule/InstanceOf.java
+
+
+PRIVATE_IA_PAL_1_75_D (2007-10-16) [JSS]
+---------------------
+- Documentation improvements in the PAL Guide:
+  + Note informing that the product type must be constant along a version track.
+  + Pool evolution tool section added.
+  + Some other updates.
+- Files affected:
+  * Added:
+        doc/guide/html/ar01s14.html
+  * Modified:
+        doc/guide/html/ar01s05.html
+        doc/guide/html/ar01s07.html
+        doc/guide/html/ar01s08.html
+        doc/guide/html/ar01s09.html
+        doc/guide/html/ar01s10.html
+        doc/guide/html/ar01s11.html
+        doc/guide/html/ar01s12.html
+        doc/guide/html/ar01s13.html
+        doc/guide/html/pal-guide.html
+        doc/guide/xml/pal-guide.xml
+
+PRIVATE_IA_PAL_1_75_C (2007-10-16) [JSS]
+---------------------
+- Exception message when trying to store a product with changed type modified.
+  Related to SPR-3576.
+- Files affected:
+  * Modified:
+        VersionTrackHandler.java
+
+PRIVATE_IA_PAL_1_75_B (2007-10-15) [PB]
+---------------------
+- Updating test harness code:
+   - Increasing max number of allowed pool in AbstractPalTestCase from 5 to
+     50, because 5 is too limited for benchmarking a number of different pools.
+   - In CommonPalTestSet making PalPerformanceTestGroup protected
+   - Adding PerformanceTestGroup.setPool method to allow explicit setting of 
+     pool to run on.
+   - TestProductGenerator: Adding a few methods to provide a pool with test 
+     products. Generalizing existing test product generation method to allow 
+     creation of products of the size you want.
+  -  FileUtil groups deleteDirectory previously stored in
+     LStoreMaintenanceUtil and a new method, getSizeOnDisk.
+  -  In test tree adding classes to allow benchmarking of pool
+     implementations.
+ * Modified:
+        AbstractPalTestCase.java
+	CommonPalTestSet.java
+	PerformancePalTestGroup.java
+	TestProductGenerator.java
+	VersionPalTestGroup.java
+ * Added:
+	util/FileUtil.java
+        In test:
+        performace/AbstractBenchmark.java
+        performace/ResultSet.java
+        performace/Timer.java
+
+	
+PRIVATE_IA_PAL_1_75_A (2007-10-15) [JSS]
+---------------------
+- New test harness added for checking implementation of SPR-3620.
+- Files affected:
+  * Modified:
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+    
+D_IA_PAL_1_75 (2007-10-15) [JSS]
+-------------
+- Parameters to PoolSchemaEvolver in evolvePool are passed with "$@" instead of
+  with $*, in order to allow spaces within them.
+- Files affected:
+  * Modified:
+        util/evolvePool
+        
+D_IA_PAL_1_74 (2007-10-15) [JSS]
+-------------
+- Test harnesses changed for SPR-3609 delivered.
+- Exception message modified in MapContext.
+- Files affected:
+  * Modified:
+        MapContext.java
+        CloningPalTestGroup.java
+        CommonPalTestSet.java
+        RemovePalTestGroup.java
+        VersionPalTestGroup.java
+
+D_IA_PAL_1_73 (2007-10-10) [JSS]
+-------------
+- Implementation of improvements C, D and F of SPR-3609.
+- Some warning due to unused code removed.
+- Files affected:
+  (main branch)
+  * Added:
+        util/Pair.java
+  * Modified:
+        PersistenceLayer.java
+        ProductRef.java
+        ProductStorage.java
+        RawPoolHandler.java
+        StorageManager.java
+        VersionTrackHandler.java
+        doc/design/html/ar01s08.html
+        doc/design/html/ar01s09.html
+        doc/design/xml/pal-design.xml
+        util/UrnUtils.java
+        versioning/ProductCombinedType.java
+        versioning/VersionLoader.java
+        versioning/VersionTrackInfo.java
+        versioning/VersionTrackProduct.java
+  (test branch)
+  * Modified:
+        CloningPalTestGroup.java
+        CommonPalTestSet.java
+        RemovePalTestGroup.java
+        VersionPalTestGroup.java
+
+D_IA_PAL_1_72 (2007-10-05) [JSS]
+-------------
+- Dependencies in PAL tests on pool implementations removed.
+- Change in BasicLock so it may be used in other SOs different than Unix/Linux.
+- Implementation of improvements A and B of SPR-3609.
+- Copy constructors added to MapContext and ListContext, in order to partially
+  solve SPR-3620.
+- Files affected:
+  (main branch)
+  * Modified:
+        ListContext.java
+        MapContext.java
+        PersistenceLayer.java
+        ProductRef.java
+        ProductStorage.java
+        RawPoolHandler.java
+        VersionTrackHandler.java
+        util/BasicLock.java
+        util/UrnUtils.java
+  (test branch)
+  * Deleted:
+        CloningLeafProductTest.java
+        CloningListContextTest.java
+        CloningListContextVersionTest.java
+        CloningMapContextTest.java
+        CloningMapContextVersionTest.java
+  * Added:
+        CloningPalTestGroup.java
+  * Modified:
+        AllTests.java
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+        WhiteBoxPalTestGroup.java
+
+PRIVATE_IA_PAL_1_71_A (2007-10-04) [PB]
+--------------------- 
+- Adding functionality to CommonPalTestSet to honour the @After and @Before
+  annotations in the TestGroups it contains.
+- Files affected:
+  * Modified:
+         test/herschel/ia/pal/CommonPalTestSet.java
+         test/herschel/ia/pal/PerformancePalTestGroup.java
+
+D_IA_PAL_1_71 (2007-10-01) [JSS]
+-------------
+- Fixed bug in VersionTrackHandler.getTags method:
+  it failed if a urn did not have any associated tag.
+- Files affected:
+  * Modified:
+        VersionTrackHandler.java
+        VersionPalTestGroup.java
+
+PRIVATE_IA_PAL_1_70_A (2007-10-01) [JSS]
+---------------------
+- SPR-3561 solved.
+- Files affected:
+  * Modified:
+        util/PoolSchemaEvolver.java
+
+D_IA_PAL_1_70 (2007-09-28) [JSS]
+-------------
+- D-tag of previous changes.
+- More SxRs implemented: 3546, 3585, 3588.
+- Some warnings in Javadoc documentation corrected.
+- Tests from versioning/RemoveTestGroup moved to RemovePalTestGroup, in order
+  to break dependencies from ia_pal to the ia_pal_pool's.
+- Files affected:
+  (main branch)
+  * Modified:
+        MapContext.java
+        PalAdmin.java
+        PoolCreator.java
+        PoolManager.java
+        ProductRef.java
+        ProductStorage.java
+        RawPoolHandler.java
+        StorageManager.java
+        managers/PoolCreatorFactory.java
+  (test branch)
+  * Deleted:
+        versioning/RemoveTestGroup.java
+  * Added:
+        managers/xml/poolWithError1.xml
+        managers/xml/poolWithError2.xml
+        managers/xml/poolWithError3.xml
+  * Modified:
+        CommonPalTestSet.java
+        RemovePalTestGroup.java
+        VersionPalTestGroup.java
+        managers/PoolManagerTest.java
+        managers/xml/jake.config
+        versioning/AllTests.java
+
+PRIVATE_IA_PAL_1_69_C (2007-09-28) [JSS]
+---------------------
+- SCR-3548 implemented.
+- Files affected:
+  * Modified:
+        PersistenceLayer.java
+        ProductStorage.java
+        VersionTrackHandler.java
+        VersionPalTestGroup.java
+
+PRIVATE_IA_PAL_1_69_B (2007-09-27) [PB]
+---------------------
+- Updating different tests to be compatible with the allowed
+  dependency structure between modules. Module ia_pal is not allowed
+  to depend on the modules with the pool implementations,
+  ia_pal_pool_simple, etc.
+- Files affected:
+  * Renamed: (results in CVS remove and add)
+        In test/herschel/ia/pal/versioning/
+              RemoveTest.java --> RemoveTestGroup.java
+        In test/herschel/ia/pal/
+               WhiteBoxPalTest.java --> WhiteBoxPalTestGroup.java
+  * Modified:
+        test/herschel/ia/pal/AllTests.java
+        test/herschel/ia/pal/CommonPalTestSet.java
+        test/herschel/ia/pal/VersionPalTestGroup.java
+        test/herschel/ia/pal/versioning/AllTests.java
+
+PRIVATE_IA_PAL_1_69_A (2007-09-27) [JSS]
+---------------------
+- Diagram added to the PAL Design document about version products.
+- Files affected:
+  * Added:
+        doc/design/images/PAL-VersionProducts.odg
+        doc/design/images/PAL-VersionProducts.png
+  * Modified:
+        doc/design/html/ar01s08.html
+        doc/design/html/ar01s09.html
+        doc/design/html/ar01s10.html
+        doc/design/xml/pal-design.xml
+
+D_IA_PAL_1_69 (2007-09-27) [JSS]
+-------------
+- Documentation about the locking mechanism and versioning implementation added.
+- Files affected:
+  * Added:
+        doc/design/images/caution.gif
+        doc/design/images/note.gif
+        doc/guide/html/ar01s13.html
+  * Modified:
+        doc/design/html/ar01s08.html
+        doc/design/html/ar01s09.html
+        doc/design/html/ar01s10.html
+        doc/design/html/pal-design.html
+        doc/design/images/PAL-KeyClasses.png
+        doc/design/images/PAL-KeyClasses.violet
+        doc/design/xml/pal-design.xml
+        doc/guide/html/ar01s05.html
+        doc/guide/html/ar01s06.html
+        doc/guide/html/ar01s08.html
+        doc/guide/html/ar01s09.html
+        doc/guide/html/ar01s10.html
+        doc/guide/html/ar01s11.html
+        doc/guide/html/ar01s12.html
+        doc/guide/html/pal-guide.html
+        doc/guide/xml/pal-guide.xml
+
+D_IA_PAL_1_68 (2007-09-11) [JSS]
+-------------
+- Message of evolvePool modified.
+- jake.config added to util directory, to copy evolvePool and evolvePool.bat.
+- Files affected:
+  * Added:
+        util/jake.config
+  * Modified:
+        util/PoolSchemaEvolver.java
+
+D_IA_PAL_1_67 (2007-09-10) [PB, JSS]
+-------------
+- Fixing problem in finding root products in PoolSchemaEvolver.
+  findRootProducts.
+- Files affected:
+  * Modified:
+        util/PoolSchemaEvolver.java
+
+PRIVATE_IA_PAL_1_66_C (2007-09-10) [JSS]
+---------------------
+- Mechanism for assuring that a product is not cloned more than once in a
+  ProductStorage.save operation.
+- Link to images corrected in PAL Guide.
+- Files affected:
+  * Modified:
+        ListContext.java
+        MapContext.java
+        ProductRef.java
+        ProductStorage.java
+        doc/guide/html/ar01s08.html
+
+PRIVATE_IA_PAL_1_66_B (2007-09-10) [JSS]
+---------------------
+- Public constructors added to PoolSchemaEvolver.
+- evolvePool and evolvePool.bat scripts added.
+- Configuration variable name updated in Javadoc documentation.
+- Files affected:
+  * Added:
+        util/evolvePool
+        util/evolvePool.bat
+  * Modified:
+        ProductStorage.java
+        util/PoolSchemaEvolver.java
+
+PRIVATE_IA_PAL_1_66_A (2007-09-07) [PB]
+---------------------
+- SCR 3361: Adding class PoolSchemaEvolver.
+
+D_IA_PAL_1_66 (2007-09-06) [PB, JSS]
+-------------
+- SPR-3547 corrected: now ProductRef.getUrn returns null as before the
+  introduction of versioning mechanism.
+- Update in Javadoc comments of ProductStorage.select methods.
+- Calls to logger in VersionTrackHandler commented out.
+- Files affected:
+  * Modified:
+        ProductRef.java
+        ProductStorage.java
+        VersionTrackHandler.java
+        CommonPalTestSet.java
+        ContextPalTestGroup.java
+
+D_IA_PAL_1_65 (2007-09-06) [PB, JSS]
+-------------
+- Updated JavaDoc on ProductStorage.select(StorageQuery)
+  method (was out of date).
+- Fixing VersionTrackHandler.remove method to prevent a
+  NullPointerException when removing Products from a pool
+  that is not yet evolved to contain version information.
+- PAL Guide updated with a warning informing that Products can only be
+  extended in Java, not in Jython, and with a new section informing about
+  the simplified configuration of pool and storage managers.
+- Files affected:
+  * Modified:
+        ProductStorage.java
+        doc/guide/html/ar01s06.html
+        doc/guide/html/ar01s08.html
+        doc/guide/html/ar01s11.html
+        doc/guide/html/pal-guide.html
+        doc/guide/xml/pal-guide.xml
+
+D_IA_PAL_1_64 (2007-09-05) [JSS]
+-------------
+- Implementation of SCR-3393.
+- PAL Guide updated with a new section of product versioning.
+- Files affected:
+  * Added:
+  (main branch)
+        doc/guide/html/ar01s12.html
+        doc/guide/images/caution.gif
+        doc/guide/images/note.gif
+        managers/jython/cache.py
+        managers/jython/db.py
+        managers/jython/lstore.py
+        managers/jython/serial.py
+        managers/jython/simple.py
+  * Modified:
+  (main branch)
+        PoolManager.java
+        StorageManager.java
+        defns/pal.xml
+        doc/guide/html/ar01s05.html
+        doc/guide/html/ar01s07.html
+        doc/guide/html/ar01s08.html
+        doc/guide/html/ar01s09.html
+        doc/guide/html/ar01s10.html
+        doc/guide/html/ar01s11.html
+        doc/guide/html/pal-guide.html
+        doc/guide/xml/pal-guide.xml
+        managers/PoolCreatorFactory.java
+        managers/jython/JythonPoolConfigReader.java
+        managers/jython/jake.config
+        managers/jython/pool-standard.py
+        managers/jython/store-standard.py
+        managers/utils/PoolManagerUtils.java
+        managers/utils/StorageManagerUtils.java
+        pool/serial/SerialClientPool.java
+  (test branch)
+        managers/AllTests.java
+        managers/PoolManagerTest.java
+        managers/StorageManagerTest.java
+        managers/test.defaults
+        managers/jython/JythonPoolConfigTest.java
+
+D_IA_PAL_1_63 (2007-09-05) [JSS]
+-------------
+- D-tag of product versioning.
+
+PRIVATE_IA_PAL_1_62_M (2007-09-04) [JSS]
+---------------------
+- Design document updated with product versioning.
+- Constructor that accepts a retrieveAllVersions flag added to Query class.
+- Files affected:
+  * Added:
+        doc/design/html/ar01s10.html
+        doc/design/images/PAL-ConceptualBreakdown.odp
+        doc/design/images/PAL-ConceptualBreakdown.png
+        doc/design/images/PAL-KeyClasses.png
+        doc/design/images/PAL-KeyClasses.violet
+  * Modified:
+        doc/design/html/ar01s07.html
+        doc/design/html/ar01s08.html
+        doc/design/html/ar01s09.html
+        doc/design/html/pal-design.html
+        doc/design/xml/pal-design.xml
+        query/Query.java
+
+PRIVATE_IA_PAL_1_62_L (2007-09-04) [JSS]
+---------------------
+- @deprecated tag removed from Context.getVersions().
+- Bug fixed in VersionTrackHandler.getLatestRefs: getVersionTrackInfo may
+  return a null reference.
+- Files affected:
+  * Modified:
+        Context.java
+        VersionTrackHandler.java
+
+PRIVATE_IA_PAL_1_62_K (2007-09-04) [JSS]
+---------------------
+- Basic locking mechanism implemented to allow accessing concurrently to the
+  common TagsProduct.
+- Files affected:
+  * Added:
+        util/BasicLock.java
+        util/Lockable.java
+        util/QueryUtil.java
+  * Modified:
+        PersistenceLayer.java
+        ProductPool.java
+        RawPoolHandler.java
+        VersionTrackHandler.java
+        versioning/AbstractVersionProduct.java
+        versioning/VersionLoader.java
+
+PRIVATE_IA_PAL_1_62_J (2007-08-28) [JSS]
+---------------------
+- Configuration property hcss.ia.pal.reloadVersionInfo moved to
+  hcss.ia.pal.sharedMode.
+- Some utility methods moved from VersionTrackHandler to UrnUtils.
+- _jython member in Query class is made transient, to allow Query objects be
+  serializable.
+- Refactoring of product versioning: the VersionProduct is replaced by a
+  VersionTrackProduct for each edition, and a TagsProduct, that holds the
+  information about tags.
+- Files affected:
+  * Deleted:
+        versioning/UrnsDataset.java
+        versioning/VersionProduct.java
+        versioning/VersionProductLoader.java
+        versioning/VersionTypesDataset.java
+        versioning/VersionsDataset.java
+  * Added:
+        versioning/AbstractVersionProduct.java
+        versioning/TagsProduct.java
+        versioning/VersionLoader.java
+        versioning/VersionTrackProduct.java
+  * Modified:
+        PersistenceLayer.java
+        ProductStorage.java
+        VersionTrackHandler.java
+        defns/pal.xml
+        query/Query.java
+        util/UrnUtils.java
+        versioning/TagsDataset.java
+        versioning/VersionTrackInfo.java
+
+PRIVATE_IA_PAL_1_62_I (2007-08-22) [JSS]
+---------------------
+- Configuration property herschel.ia.pal.reloadVersionInfo moved to
+  hcss.ia.pal.reloadVersionInfo.
+- JythonInterpretor uses a different namespace for the matches method,
+  and it adds an error message with information to the user about using the
+  meta.containsKey method in the queries.
+- versionInfo meta data is splitted into versionTrack and versionNumber.
+  This way, regular expression stuff in VersionTrackInfo class is removed.
+- VersionTrackHandler.isSameVersion method added, and used by ProductStorage,
+  through PersistenceLayer class.
+- Added test harnesses for the examples about product versioning shown in
+  http://www.herschel.be/twiki/bin/view/Hcss/ProductVersioningGuide
+- Files affected:
+  * Modified:
+        JythonInterpretor.java
+        PersistenceLayer.java
+        ProductStorage.java
+        VersionTrackHandler.java
+        defns/pal.xml
+        versioning/VersionProduct.java
+        versioning/VersionTrackInfo.java
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+
+PRIVATE_IA_PAL_1_62_H (2007-08-20) [HS]
+---------------------
+
+- Removed redundant import methods
+- Removed redundant logger.info calls
+- Corrected logger instantations to make use of class name
+- VersionDataset: renamed attributes and internal variables such that term 'alias' is removed.
+- versioning/*Dataset classes: added brief documentation.
+
+
+PRIVATE_IA_PAL_1_62_G (2007-08-20) [JSS]
+---------------------
+- Configuration property herschel.ia.pal.reloadVersionInfo added, and used
+  in VersionTrackHandler to allow fast stand-alone access, or concurrent
+  access to versioning information. The performance of this latter has been
+  improved with respect to the previous version.
+  Old VersionProduct's are removed when a new VersionProduct is created.
+  Test testRemoveAndAdd created.
+- Files affected:
+  * Modified:
+        ProductStorage.java
+        VersionTrackHandler.java
+        defns/pal.xml
+        CommonPalTestSet.java
+        RemovePalTestGroup.java
+        VersionPalTestGroup.java
+
+PRIVATE_IA_PAL_1_62_F (2007-08-17) [JSS]
+---------------------
+- Problem regarding synchronization of versioning information in different
+  product storages solved. Some warnings of the Eclipse java compiler removed.
+- Files affected:
+  * Deleted:
+        utils/UrnUtils.java
+  * Added:
+        util/UrnUtils.java
+  * Modified:
+        Context.java
+        PersistenceLayer.java
+        ProductPoolComparator.java
+        ProductRef.java
+        ProductStorage.java
+        RawPoolHandler.java
+        VersionTrackHandler.java
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+        versioning/RemoveTest.java
+
+PRIVATE_IA_PAL_1_62_E (2007-08-14) [JSS]
+---------------------
+- SPR-3458 solved.
+  ProductRef.equals method corrected, so that it does not throw a
+  NullPointerException when _urn is null and _product is not, and products
+  are different.
+- Files affected:
+  * Added:
+        WhiteBoxPalTest.java
+  * Modified:
+        ListContext.java
+        MapContext.java
+        ProductRef.java
+        AllTests.java
+
+PRIVATE_IA_PAL_1_62_D (2007-08-13) [HS]
+---------------------
+- SPR-3484: Added CHANGELOG to online documentation
+
+PRIVATE_IA_PAL_1_62_C (2007-08-13) [HS]
+---------------------
+- Developer guide: corrected examples for contexts such that 'getRefs()'
+  method is used.
+
+PRIVATE_IA_PAL_1_62_B (2007-08-08) [JCS]
+---------------------
+- Added a test for 'saveHeadOnly' ProductPool functionality.
+- Files affected in test:
+  * Modified:
+        CommonPalTestSet.java
+        VersionPalTestGroup.java
+
+PRIVATE_IA_PAL_1_62_A (2007-08-08) [JSS]
+---------------------
+- Product versioning added.
+- Files affected in main:
+  * Added:
+        BasicStorageQueryVisitor.java
+        PalAdmin.java
+        PersistenceLayer.java
+        ProductSelector.java
+        RawPoolHandler.java
+        VersionTrackHandler.java
+        utils/UrnUtils.java
+        versioning/ProductCombinedType.java
+        versioning/TagsDataset.java
+        versioning/UrnsDataset.java
+        versioning/VersionProduct.java
+        versioning/VersionProductLoader.java
+        versioning/VersionTrackInfo.java
+        versioning/VersionTypesDataset.java
+        versioning/VersionsDataset.java
+  * Modified:
+        Context.java
+        ListContext.java
+        MapContext.java
+        ProductRef.java
+        ProductStorage.java
+        jake.config
+        query/AbstractQuery.java
+        query/AttribQuery.java
+        query/FullQuery.java
+        query/MetaQuery.java
+        query/Query.java
+        query/StorageQuery.java
+- Files affected in test:
+  * Added:
+        VersionPalTestGroup.java
+        versioning/AllTests.java
+        versioning/MetaDataTest.java
+        versioning/RemoveTest.java
+        versioning/TestProduct.java
+  * Modified:
+        AllTests.java
+        CloningListContextTest.java
+        CloningMapContextVersionTest.java
+        CommonPalTestSet.java
+        ContextPalTestGroup.java
+
+D_IA_PAL_1_62 (2007-08-06) [JCS]
+-------------
+- Updated the RemovePalTestGroup test.
+- Files affected in test:
+  * Modified:
+        CommonPalTestSet.java
+        RemovePalTestGroup.java
+
+D_IA_PAL_1_61 (2007-08-03) [JSS]
+-------------
+- D-tag of previous changes.
+
+PRIVATE_IA_PAL_1_60_F (2007-08-03) [JSS]
+-----------------------------------
+- AbstractPalTestCase.MAX_POOLS is made protected, in order to allow test
+  classes of pool.db to create the databases if necessary.
+- Files affected in test:
+  * Modified:
+        AbstractPalTestCase.java
+
+PRIVATE_IA_PAL_1_60_E (2007-08-02) [JSS]
+-----------------------------------
+- Test framework updated: createPool() is replaced by getPool().
+  New abstract methods createPool(int index) and cleanPool(int index) added
+  to AbstractPalTestCase. Utility methods getPool(int index) and cleanPools()
+  added to AbstractPalTestCase.
+  Derived test classes updated accordingly.
+- Files affected in test:
+  * Modified:
+        AbstractPalTestCase.java
+        AbstractPalTestGroup.java
+        AttributePalTestGroup.java
+        BasicPalTestGroup.java
+        CloningListContextTest.java
+        CommonPalTestSet.java
+        ContextPalTestGroup.java
+        FullQueryPalTestGroup.java
+        GeneralQueryPalTestGroup.java
+        MetaPalTestGroup.java
+        PerformancePalTestGroup.java
+        RemovePalTestGroup.java
+
+PRIVATE_IA_PAL_1_60_D (2007-07-31) [JCS]
+-----------------------------------
+- Fixed a DbPool initialization/clean up in XmlPoolConfigTest.
+- Files affected in test:
+  * Modified:
+        managers/xml/XmlPoolConfigTest.java
+
+PRIVATE_IA_PAL_1_60_C (2007-07-31) [JCS]
+-----------------------------------
+- Moved the removal tests to the common test structure.
+- Added the performance tests to the common test structure.
+- Added a new HCSS property: hcss.ia.pal.pool.performancetest.size with a default value of 100.
+- Files affected in main:
+  * Modified:
+        defns/pal.xml
+- Files affected in test:
+  * Deleted:
+        PerformancePalTestSet.java
+        PoolRemoveTest.java
+  * Added:
+        RemovePalTestGroup.java
+  * Modified:
+        CommonPalTestSet.java
+        PerformancePalTestGroup.java
+
+PRIVATE_IA_PAL_1_60_B (2007-07-26) [JCS]
+-----------------------------------
+- Modified ProductPool interface to include the remove method.
+- Created a base class with the code for verifying the removal functionality
+- Files affected in main:
+  * Modified:
+        ProductPool.java
+- Files affected in test:
+  * Added:
+        PoolRemoveTest.java
+
+
+PRIVATE_IA_PAL_1_60_A (2007-07-25) [BLI]
+-----------------------------------
+- TestProductGenerator moved to herschel.ia.pal
+- Clear the mixed load and other extra processes in testXXXQuery() performance test cases.
+- Update javadoc for test code
+- Files affected in test: 
+  * Moved:
+  		herschel/ia/pal/pool/lstore/TestProductGenerator moved to herschel/ia/pal
+  * Modified:
+  		herschel/ia/pal/PerformancePalTestGroup.java 
+		herschel/ia/pal/PerformancePalTestSet.java 	
+		herschel/ia/pal/pool/lstore/LocalStoreProductPoolFactoryTest.java
+		herschel/ia/pal/pool/lstore/FitsProductPoolTest.java
+
+D_IA_PAL_1_60 (2007-07-24) [HS]
+-----------------------------------
+- MapContext: addressed ambiguity in Column constructor call
+              due to new Unit library.
+
+PRIVATE_IA_PAL_1_59_C (2007-07-22) [BLI]
+-----------------------------------
+- Add PAL performance test suite
+- Files affected in test: 
+  * Added: 
+		herschel/ia/pal/PerformancePalTestGroup.java 
+		herschel/ia/pal/PerformancePalTestSet.java 
+		herschel/ia/pal/pool/lstore/LStorePerformanceTest.java 
+		herschel/ia/pal/pool/simple/SimplePoolPerformanceTest.java 
+		build.xml(final location TBD) 
+  * Modified: 
+		herschel/ia/pal/pool/lstore/TestProductGenerator.java 
+  * Deleted: 
+		herschel/ia/pal/pool/lstore/PerformanceTest.java 
+		herschel/ia/pal/pool/lstore/PALPerformanceTest.java 
+
+PRIVATE_IA_PAL_1_59_B (2007-07-19) [HS]
+-----------------------------------
+- Removed import statement corresponding to an omg.* class
+
+PRIVATE_IA_PAL_1_59_A (2007-07-18) [HS]
+-----------------------------------
+- Fixed javadoc ref to Context in ProductPool
+
+D_IA_PAL_1_59 (2007-07-18) [HS]
+-----------------------------------
+- Updated javadoc for JythonInterpretor and PoolManager
+
+D_IA_PAL_1_58 (2007-07-18) [HS]
+-----------------------------------
+- Corrected broken links in documentation (doc/index.html)
+
+D_IA_PAL_1_57 (2007-07-17) [HS]
+-----------------------------------
+- Previous tag was not assigned correctly. Re-tagging
+
+D_IA_PAL_1_56 (2007-07-16) [HS]
+-----------------------------------
+- Moved ia.pal.managers.PoolCreator to ia.pal.PoolCreator
+
+D_IA_PAL_1_55 (2007-07-16) [HS]
+-----------------------------------
+- Design doc: added information on PAL common test suite
+- Guide: added information on PAL common test suite usage
+- Guide: added list of pool types for XML configuration files
+
+D_IA_PAL_1_54 (2007-07-13) [HS/JCS]
+-----------------------------------
+- 'PoolCreatorInterface' renamed to 'PoolCreator'.
+- developer guide: manager: updated references to 'PoolCreatorInterface'
+- These changes are related with the following sub-modules tags:
+  * D_IA_PAL_POOL_CACHE_1_14
+  * D_IA_PAL_POOL_DB_1_35
+  * PRIVATE_IA_PAL_POOL_LSTORE_1_15
+  * D_IA_PAL_POOL_SERIAL_1_11
+  * D_IA_PAL_POOL_SIMPLE_1_26
+- Files affected in main:
+  * Deleted:
+        managers/PoolCreatorInterface.java
+  * Modified:
+        ProductPool.java
+        doc/guide/html/ar01s10.html
+        managers/PoolCreatorFactory.java
+  * Added:
+        managers/PoolCreator.java
+
+- Files affected in test:
+  * Modified:
+        managers/xml/XmlPoolConfigTest.java
+
+D_IA_PAL_1_53 (2007-07-13) [HS]
+--------------------------------
+- D-tagged code
+
+PRIVATE_IA_PAL_1_52_A (2007-07-10) [HS]
+--------------------------------
+- developer guide: manager: in xml config example file pool type is updated
+
+PRIVATE_IA_PAL_1_52 (2007-07-10) [HS]
+--------------------------------
+- CHANGELOG updated
+
+PRIVATE_IA_PAL_1_51 (2007-07-10) [HS]
+--------------------------------
+- Added SG's MapRuleAdapter predicate
+
+PRIVATE_IA_PAL_1_50 (2007-07-10) [HS]
+--------------------------------
+- Updated pal-guide (html)
+- Re-introduced pal-design (html)
+- Updated links to online DP documentation
+- SPR-3359: update query/__init__.py
+- SPR-3360: Tagged Li Bo's updates
+
+PRIVATE_IA_PAL_1_49 (2007-07-06) [HS]
+--------------------------------
+- Updated pal-guide (html)
+- Removed pal-design document, as this is now integrated into the pal-guide
+- Updated javadoc on key classes (Context, MapContext, ListContext,
+ProductStorage, ProductPool, PoolManager, StorageManager, and PoolCreatorInterface
+
+PRIVATE_IA_PAL_1_48 (2007-07-03) [JCS]
+--------------------------------
+- Modified several classes to avoid some dependencies.
+- These changes are related to the following sub-modules tags:
+  * PRIVATE_IA_PAL_POOL_CACHE_1_12
+  * PRIVATE_IA_PAL_POOL_DB_1_32 
+  * PRIVATE_IA_PAL_POOL_LSTORE_1_14
+  * PRIVATE_IA_PAL_POOL_SERIAL_1_8
+  * PRIVATE_IA_PAL_POOL_SIMPLE_1_23
+- Files Affected in main:
+  * Deleted:
+        managers/xml/CachedPoolCreator.java
+        managers/xml/ClientPoolCreator.java
+        managers/xml/DbPoolCreator.java
+        managers/xml/LstorePoolCreator.java
+        managers/xml/PoolCreator.java
+        managers/xml/SimplePoolCreator.java
+  * Modified:
+        defns/pal.xml
+        managers/xml/PoolHandler.java
+        managers/xml/XmlPoolConfigReader.java
+        pool/cache/CHANGELOG
+        pool/db/CHANGELOG
+        pool/lstore/CHANGELOG
+        pool/lstore/LocalStoreFactory.java
+        pool/serial/CHANGELOG
+        pool/simple/CHANGELOG
+        pool/simple/SimplePoolFactory.java
+  * Added:
+        managers/PoolCreatorFactory.java
+        managers/PoolCreatorInterface.java
+        pool/cache/CacheFactory.java
+        pool/db/DbFactory.java
+        pool/serial/SerialClientFactory.java
+- Files Affected in test:
+  * Modified:
+        managers/testpoolconfig.xml
+        managers/xml/PoolHandlerTest.java
+        managers/xml/XmlPoolConfigTest.java
+        managers/xml/jake.config
+        managers/xml/pool-a.xml
+        managers/xml/pool-b.xml
+        managers/xml/pool-c.xml
+        managers/xml/pool-standard.xml
+        managers/xml/test.defaults
+        managers/xml/testpoolconfig.xml
+        managers/xml/testpoolhandlerconfig.xml
+        managers/xml/testpools.xml
+  * Added:
+        managers/xml/pool-db.xml
+
+
+D_IA_PAL_1_47 (2007-06-22) [JCS]
+--------------------------------
+- Updated some jython examples in 'MapContext' and 'ListContext' (SPR-2998).
+- Added some explanations to javadoc API for 'Context'
+- Files affected in main:
+  * Modified:
+        Context.java
+        ListContext.java
+        MapContext.java
+
+
+D_IA_PAL_1_46 (2007-06-21) [JCS]
+--------------------------------
+- Updated some test-harnesses to work with the new 'SimplePool.getId()' behaviour (SPR-3143).
+- Files affected in test:
+  * Modified:
+        managers/PoolManagerTest.java
+        managers/StorageManagerTest.java
+        managers/jython/JythonPoolConfigTest.java
+        managers/jython/JythonStorageConfigTest.java
+        managers/xml/XmlPoolConfigTest.java
+        managers/xml/XmlStorageConfigTest.java
+
+D_IA_PAL_1_45 (2007-06-21) [JCS]
+--------------------------------
+- Updated some classes in order to specify a set of properties for PoolManager and StoreManager.
+- Updated some test classes to set an specific set of properties for test purpose when working with pools and storages. 
+- Files affected in main:
+  * Modified:
+        managers/utils/PoolManagerUtils.java
+        managers/utils/StorageManagerUtils.java
+- Files affected in test:
+  * Modified:
+        managers/PoolManagerTest.java
+        managers/StorageManagerTest.java
+        managers/test.defaults
+        managers/jython/JythonPoolConfigTest.java
+        managers/jython/JythonStorageConfigTest.java
+        managers/jython/test.defaults
+        managers/xml/XmlPoolConfigTest.java
+        managers/xml/XmlStorageConfigTest.java
+        managers/xml/test.defaults
+
+
+D_IA_PAL_1_44 (2007-06-19) [TZ]
+--------------------------------
+ 
+[HS 21-Jun-2007: entry removed, as TZ's description applies to an
+update to ia_pal_pool_db, not ia_pal
+
+
+D_IA_PAL_1_43 (2007-06-19) [JCS]
+--------------------------
+- D-tag the latest changes:
+  * 'PoolManager' optimization.
+  * Two new variables to specify the store directory.
+  * Query improvement.
+- Updated 'MapContext' and 'ListContext' documentation example (SPR-2998).
+- Updated java API documentation of 'getAllRefs()' and 
+'hasDirtyReferences()' methods of 'Context' (SPR-3172)
+- Files affected in main:
+  * Modified:
+        Context.java
+        ListContext.java
+        MapContext.java
+        query/package.html
+
+PRIVATE_IA_PAL_1_43 (2007-06-18) [JCS]
+--------------------------------
+- 'PoolManagerUtils' code optimization.
+- Files affected in main:
+  * Modified:
+        managers/utils/PoolManagerUtils.java
+
+PRIVATE_IA_PAL_1_42 (2007-06-01) [JCS]
+--------------------------------
+- Added two new variables: 'hcss.ia.pal.pool.simple.dir' (for Simple pool) and 
+'hcss.ia.pal.pool.cache.dir' (Cache pool) to set the store directory.
+- Files affected in main:
+  * Modified:
+        defns/pal.xml
+
+
+PRIVATE_IA_PAL_1_41 (2007-05-22) [JCS]
+--------------------------------
+- Query improvement: added new classes / jython scripts to simplify queries in pal.
+- Files affected in main:
+  * Added:
+        query/Query.java
+        query/demo/__init__.py
+        query/demo/jake.config
+        query/demo/pal_api_demo.py
+        query/parser/PALParser.java
+        query/parser/ParseException.java
+        query/parser/__init__.py
+        query/parser/jake.config
+        query/parser/jython/StringIO.py
+        query/parser/jython/__init__.py
+        query/parser/jython/jake.config
+        query/parser/jython/keyword.py
+        query/parser/jython/parser.py
+        query/parser/jython/token.py
+        query/parser/jython/tokenize.py
+  * Modified:
+        __init__.py
+        defns/pal.xml
+        query/__init__.py
+- Files affected in test:
+  * Added:
+        __init__.py
+        jake.config
+        query/PalApiTest.py
+        query/__init__.py
+        query/jake.config
+        query/test.defaults
+  * Modified:
+        query/AllTests.java
+
+D_IA_PAL_1_40 (2007-05-11) [JCS]
+--------------------------
+- 'D-tag' for 'FineTime' modifications.
+
+PRIVATE_IA_PAL_1_39 (2007-05-08) [JCS]
+--------------------------------
+- Updated the java/jython API explanations for using FineTime instead of Date.
+- Files affected in main:
+  * Modified:
+        query/AttribQuery.java
+
+D_IA_PAL_1_38 (2007-04-24) [HS]
+------------------------
+Fixed remaining problems in manager test harness following introduction og standard pool/store
+
+D_IA_PAL_1_37 (2007-04-24) [HS]
+------------------------
+Introduced a copy of the standard pool and store into the parallel test tree
+
+D_IA_PAL_1_36 (2007-04-24) [HS]
+------------------------
+Removed all references to var.hcss.dir in parallel test tree for the ia_pal module
+
+D_IA_PAL_1_35 (2007-04-24) [HS]
+------------------------
+Corrected location of test manager .xml/.py files to that of parallel test tree
+
+D_IA_PAL_1_34 (2007-04-23) [HS]
+------------------------
+D-tagged code.
+
+PRIVATE_IA_PAL_1_33_C (2007-04-20) [HS]
+------------------------
+Updates to design documentation.
+
+PRIVATE_IA_PAL_1_33_B (2007-04-18) [HS]
+------------------------
+Included defns/pal.xml file.
+
+PRIVATE_IA_PAL_1_33_A (2007-04-17) [HS]
+------------------------
+Added standard pool/storage configurations.
+
+D_IA_PAL_1_33 (2007-03-27) [HS]
+------------------------
+Withdrawn pal query code.
+
+D_IA_PAL_1_32 (2007-03-27) [HS]
+------------------------
+Omitted to include pal/defns directory.
+
+D_IA_PAL_1_31 (2007-03-26) [HS]
+------------------------
+
+PRIVATE_IA_PAL_1_30_A (2007-03-26) [HS]
+------------------------
+Incorporated Li Bo's new alternative query API.
+
+D_IA_PAL_1_30 (2007-02-15) [HS]
+------------------------
+Updated __init__.py so that dbpool and lstore can be imported
+
+D_IA_PAL_1_29 (2007-02-15) [HS]
+------------------------
+Updated __init__.py so that managers can be imported
+
+D_IA_PAL_1_28 (2007-02-14) [HS]
+------------------------
+
+PRIVATE_IA_PAL_1_27_A (2007-01-24) [HS]
+------------------------
+Updates based on comments from Jose Osinde:
+
+1. default pool/store keys originally needed to be set, else
+   ConfigurationException thrown - fixed.
+2. StorageManager could only read .xml definitions - fixed.
+
+D_IA_PAL_1_27 (2007-01-23) [HS]
+------------------------
+Document update: updated URM for query issues
+
+D_IA_PAL_1_26 (2007-01-23) [HS]
+------------------------
+Document update: updated URM and javadoc
+
+D_IA_PAL_1_25 (2007-01-22) [HS]
+------------------------
+D-tagged recent code.
+
+PRIVATE_IA_PAL_1_24_D (2007-01-19) [HS]
+------------------------
+Added deep cloning feature.
+
+PRIVATE_IA_PAL_1_24_C (2007-01-19) [GDT]
+------------------------
+Added new rules test and context test
+
+PRIVATE_IA_PAL_1_24_B (2007-01-19) [HS]
+------------------------
+Added example manager config files to doc/examples/managers directory.
+
+PRIVATE_IA_PAL_1_24_A (2007-01-17) [GDT]
+------------------------
+Update to the Developer's Guide
+/pal/doc/guide/xml/pal-guide.xml
+
+D_IA_PAL_1_24 (2007-01-16) [HS]
+------------------------
+D-tagged manager code.
+
+PRIVATE_IA_PAL_1_23 (2007-01-12) [HS]
+------------------------
+Fixed omitted test files such that test harness in parallel tree works.
+
+PRIVATE_IA_PAL_1_22 (2007-01-12) [HS]
+------------------------
+Omitted the Store/PoolManager classes themselves. Just added.
+
+PRIVATE_IA_PAL_1_21 (2007-01-12) [HS]
+------------------------
+Store and pool manager code added. Requires further testing.
+
+PRIVATE_IA_PAL_1_20 (2007-01-09) [GDT]
+------------------------
+Changes to ContextPalTestGroup.java to test ListContext.java and changes to the products.
+
+Files affected : 
+ContextPalTestGroup.java
+
+PRIVATE_IA_PAL_1_19 (2006-12-19) [GDT]
+------------------------
+Added additional tests.
+In ContextPalTestGroup.java
+In pool/simple/SimplePoolSpecificTest.java
+In pool/rule/AllTests.java
+Added TypeExistsRule.java
+
+
+D_IA_PAL_1_18 (2006-12-13) [HS]
+------------------------
+Now uses update to share/interpretor
+
+D_IA_PAL_1_17 (2006-12-07) [HS]
+------------------------
+Added testSpr2356BracketsQuerytest
+
+
+D_IA_PAL_1_16 (2006-12-07) [HS]
+------------------------
+Added additional tests for SPR-2356 and SPR-2357
+
+D_IA_PAL_1_15 (2006-12-06) [HS]
+------------------------
+Added additional tests on pool.load() and pool.meta()
+
+PRIVATE_IA_PAL_1_14_C (2006-12-05) [HS]
+------------------------
+Added additional tests on pool.load() and pool.meta()
+
+PRIVATE_IA_PAL_1_14_B (2006-12-05) [HS]
+------------------------
+(incorrect tag)
+
+PRIVATE_IA_PAL_1_14_A (2006-12-04) [HS]
+------------------------
+Fixed various minor bugs and made setVersionData() to be package-private
+to allow access from other package classes (eg prototype cloning)
+
+D_IA_PAL_1_14 (2006-11-29) [HS]
+------------------------
+Fixed SPR-2290: trapped PyExceptions and throw IllegalArgumentExceptions
+
+PRIVATE_IA_PAL_1_13_A (2006-11-28) [HS]
+------------------------
+Updated SimplePoolCacheUtils to provide means of creating/deleting
+sub-partitions.
+
+D_IA_PAL_1_13 (2006-11-26) [HS]
+------------------------
+Removed logger.info calls in ProductRef and Context
+
+D_IA_PAL_1_12 (2006-11-24) [HS]
+------------------------
+D-tagged code
+
+PRIVATE_IA_PAL_1_11_C (2006-11-18) [HS]
+------------------------
+- Reorganised common test suite such that tests are now
+  not defined in a single class, and are grouped
+
+PRIVATE_IA_PAL_1_11_B (2006-11-18) [HS]
+------------------------
+- SPR-2487: Now moved test harness to common suite
+
+PRIVATE_IA_PAL_1_11_A (2006-11-18) [HS]
+------------------------
+- SPR-2487: Additional fix needed to explore
+            subtle behaviour
+
+D_IA_PAL_1_11 (2006-11-17) [HS]
+------------------------
+- Test harness updates now D-tagged
+
+PRIVATE_IA_PAL_1_10_H (2006-11-16) [HS]
+------------------------
+- Tag below accidentally added to db/simple/cache/serial code;
+   re-tagging
+
+PRIVATE_IA_PAL_1_10_G (2006-11-16) [HS]
+------------------------
+- Moved jython code to dedicated class
+
+PRIVATE_IA_PAL_1_10_F (2006-11-13) [HS]
+------------------------
+- SPR-2487: added test harness to common suite
+
+	 testContextModifiedInMemoryAfterSave()
+	 testContextCreatedWhollyInMemory()
+	 testProductCreatedInMemory()
+	 testProductModifiedInMemoryAfterSave()
+
+PRIVATE_IA_PAL_1_10_E (2006-11-12) [HS]
+------------------------
+- SPR-2287: added fix
+- Developer Guide: initial text
+
+PRIVATE_IA_PAL_1_10_D (2006-11-10) [HS]
+------------------------
+- SPR-2263: Updates to error messages made by SG.
+
+PRIVATE_IA_PAL_1_10_C (2006-11-03) [HS]
+------------------------
+- Added skeleton files for developer guide and design doc.
+
+PRIVATE_IA_PAL_1_10_B (2006-11-02) [HS]
+------------------------
+- Initial common test suite complete.
+
+PRIVATE_IA_PAL_1_10_A (2006-10-31) [HS]
+------------------------
+- Introduced common tests for all pools.
+- Simple/DbPool make use of these common tests.
+
+D_IA_PAL_1_10 (2006-10-17) [HS]
+------------------------
+- Removed pool/AllTests.java that references pool implementations.
+
+D_IA_PAL_1_9 (2006-10-17) [HS]
+------------------------
+- Removed lstore/db reference in pool/AllTests file.
+
+D_IA_PAL_1_8 (2006-10-17) [HS]
+------------------------
+- Moved tests to parallel test tree.
+
+D_IA_PAL_1_7 (2006-07-22) [HS]
+------------------------
+- D-tagged as required by HIFI FHNW team.
+  Will review bug fix to product ref as part of post-summar refactoring.
+
+PRIVATE_IA_PAL_1_6_A (2006-06-27) [HS]
+------------------------
+- Added bug fix to ProductRef as provided by Marco Soldati.
+  This requires more thorough validation, so could be subject
+  to change over the next few days.
+
+D_IA_PAL_1_6 (2006-06-23) [HS]
+------------------------
+- Minor updates to URM documentation
+
+D_IA_PAL_1_5 (2006-06-23) [HS]
+------------------------
+- Added URM documentation for DP 9/2 release
+
+D_IA_PAL_1_4 (2006-06-20) [JBa]
+------------------------
+- Revamped ListContext and MapContext APIs to use the revamped
+  herschel.share.predicate package.
+  In essence, the ListContext.Rule and the MapContext.Rule interfaces
+  are dropped in favour of the now generalized Predicate<T> interface.
+
+  Knock on effect is that some of the rules are gone (RegExpRule,MapRules)
+  and re-incarnated (with added functionality) in the above mentioned
+  predicate package!=
+- Added (in light of the predicate revamp) a sanitized versions of Steve's
+  contributions  with functionality that is useful to all instrument teams.
+- !!! Requires D_SHARE_1_100 (or at least the package that contains
+      interface Predicate<T>)
+- Files affected:
+  * Modified:
+        ListContext.java
+        MapContext.java
+        rule/Alias.java
+        rule/AllTests.java
+  * Added:
+        rule/AbstractMetaPredicate.java
+        rule/AliasPresent.java
+        rule/InstanceOf.java
+        rule/MapKeyPresent.java
+        rule/MetaEquals.java
+        rule/MetaPresent.java
+        rule/StrictInstanceOf.java
+  * Deleted:
+        rule/AbstractMapRule.java
+        rule/MapRules.java
+        rule/RegExpRule.java
+  
+
+D_IA_PAL_1_3 (2006-06-04) [JBa]
+------------------------
+- Added initial URM documentation. Lots to do yet!
+- Missing:
+  * The pool implementations should have a
+      herschel.ia.pal.pool.serial.urm
+    And public User classes in such pool should have a jcategory tag:
+        @jcategory herschel.ia.pal.pool;
+  * Context need documentation
+  * Browser needs documentation
+- Files affected:
+  * Added:
+        doc/herschel.ia.pal-example.urm.xml
+        pool/herschel.ia.pal.pool.urm.xml
+        query/herschel.ia.pal.query.urm.xml
+  * Modified:
+        ProductRef.java
+        ProductStorage.java
+        herschel.ia.pal.urm.xml
+        query/AttribQuery.java
+        query/FullQuery.java
+        query/MetaQuery.java
+
+
+D_IA_PAL_1_2 (2006-06-02) [JBa]
+------------------------
+- Added placeholder for URM documentation
+- Files affected:
+  * Added:
+        herschel.ia.pal.urm.xml
+
+
+D_IA_PAL_1_1 (2006-06-02) [JBa]
+------------------------
+- Context.getVersions() now lists the current context as the
+	first entry in the list
+- Added framework of Jython modules to allow for
+      from herschel.ia.pal.all import *
+
+PRIVATE_IA_PAL_1_0_A (2006-06-02) [JBa]
+--------------------
+- Added framework of Jython modules to allow for
+      from herschel.ia.pal.all import *
+- Files affected:
+  * Added:
+        __init__.py
+        all.py
+        jake.config
+        test-init.py
+        pool/__init__.py
+        pool/jake.config
+        query/__init__.py
+        query/jake.config
+        rule/__init__.py
+        rule/jake.config
+
+
+D_IA_PAL_1_0 (2006-06-02) [JBa]
+------------------------
+- First developer tag, used for testing the build system
+
+PRIVATE_IA_PAL_1_4 (2006-06-01) [JBa]
+------------------
+- Added to the ProductStorage:
+     Set<Class> getProductClasses()
+  It returns the union of product classes found in all pools.
+- Files affected:
+        ProductStorage.java
+
+PRIVATE_IA_PAL_1_3 (2006-06-01) [JBa]
+------------------
+- Added to the ProductPool interface:
+     Set<Class> getProductClasses()
+- Tag below is wrong, as fix applies to CVS module "ia_pal_pool_serial" and
+  not the "ia_pal" module.
+- Files affected:
+        ProductPool.java
+
+PRIVATE_IA_PAL_1_2 (2006-06-01) [HS]
+------------------
+- Added save and load access control to serial server.
+- new methods setAllowSaveAccess() and setAllowLoadAccess() control
+  access, or via new command line arguments when SerialServer
+  invoked from command line.
+
+PRIVATE_IA_PAL_1_1 (2006-05-29) [JBa]
+------------------
+- Added missing exceptions clause for methods:
+  boolean exists(String urn)
+  MetaData meta(String urn)
+- Files affected:
+        ProductPool.java
+
+
+PRIVATE_IA_PAL_1_0 (2006-05-29) [JBa]
+------------------
+This release is considering the framework only.
+The framework module name is "ia_pal" and includes the following packages:
+    herschel.ia.pal
+    herschel.ia.pal.pool
+    herschel.ia.pal.query
+    herschel.ia.pal.rule
+
+CVS checkout command:
+    cvs checkout ia_pal
+
+The following packages (*) get their own (cvs) module name:
+    "ia_pal_browser"      -> herschel.ia.pal.browser.*
+    "ia_pal_pool_cache"   -> herschel.ia.pool.cache.*
+    "ia_pal_pool_lstore"  -> herschel.ia.pool.lstore.*
+    "ia_pal_pool_serial"  -> herschel.ia.pool.serial.*
+    "ia_pal_pool_simple"  -> herschel.ia.pool.simple.*
+    "ia_pal_pool_versant" -> herschel.ia.pool.versant.*
+   (*) can hold 'sub-packages'
+
+Such a setup allows us to develop sub-systems independently.
+
+- Added empty test framework
+- Files affected:
+  * Added
+        AllTests.java
+        pool/AllTests.java
+        query/AllTests.java
+        rule/AllTests.java
+
+
+PORT_IA_PAL_1_0 (2006-05-29) [JBa]
+---------------
+This release is a partial migration of the src/herschel/dp/io from the
+prototype area; CVS origin is:
+  develop/proto/dp/accesslayer [tag=PROTO_DP_ACCESSLAYER_4_18]
+- Refactored package names to herschel.ia.pal
+- Cleaned up garbage (dead code) from all imported packages
+- New package names of migrated packages:
+    herschel.ia.pal
+    herschel.ia.pal.pool.cache
+    herschel.ia.pal.pool.serial
+    herschel.ia.pal.pool.simple
+    herschel.ia.pal.query
+    herschel.ia.pal.rule
+  The packages above were based upon:
+    herschel.dp.io
+    herschel.dp.io.pool.cache
+    herschel.dp.io.pool.serial
+    herschel.dp.io.pool.simple
+    herschel.dp.io.query
+    herschel.dp.io.rule
+  Excluded the following packages because of schema evolution issues:
+    herschel.dp.io.pool.versant
+    herschel.dp.io.test
+- Note: the "herschel.ia.pal.pool.versant" will be integrated once the next
+  schema evolution has taken place.

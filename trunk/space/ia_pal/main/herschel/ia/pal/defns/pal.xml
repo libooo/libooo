@@ -1,0 +1,144 @@
+<propconfig>
+  <tab>
+    <tabname>PAL Managers</tabname>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>default store</label>
+          <outputname>hcss.ia.pal.defaultstore</outputname>
+          <tooltip>Label of default product storage</tooltip>
+          <default>standard</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>default pool</label>
+          <outputname>hcss.ia.pal.defaultpool</outputname>
+          <tooltip>Label of default product pool</tooltip>
+          <default>standard</default>
+      </property>
+      <property>
+          <fieldtype>menufield</fieldtype>
+          <label>default pool type</label>
+          <outputname>hcss.ia.pal.defaulttype</outputname>
+          <tooltip>Type of default product pool</tooltip>
+          <menuvalue>simple</menuvalue>
+          <menuvalue>lstore</menuvalue>
+          <menuvalue>db</menuvalue>
+          <menuvalue>cache</menuvalue>
+          <menuvalue>serial</menuvalue>
+          <default>lstore</default>
+      </property>
+      <property>
+          <fieldtype>menufield</fieldtype>
+          <label>Versioning strategy</label>
+          <outputname>hcss.ia.pal.version</outputname>
+          <tooltip>This specifies how product versioning is treated</tooltip>
+          <menuvalue>none</menuvalue>
+          <menuvalue>track</menuvalue>
+          <default>track</default>
+      </property>
+      <property>
+          <fieldtype>filechooserfield</fieldtype>
+          <label>location of standard scripts</label>
+          <outputname>hcss.ia.pal.poollocation</outputname>
+          <tooltip>Location of configuration files for standard pools</tooltip>
+          <default>${var.hcss.dir}/lib/herschel/ia/pal/managers/jython</default>
+      </property>
+      <property>
+          <fieldtype>filechooserfield</fieldtype>
+          <label>standard storage configuration</label>
+          <outputname>hcss.ia.pal.store.standard</outputname>
+          <tooltip>Location of configuration file for standard product storage</tooltip>
+          <default>{standard}</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Simple Pool Factory (hcss.ia.pal.poolfactory.simple)</label>
+          <outputname>hcss.ia.pal.poolfactory.simple</outputname>
+          <tooltip>Simple Pool Factory class</tooltip>
+          <default>herschel.ia.pal.pool.simple.SimplePoolFactory</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Local Store Factory (hcss.ia.pal.poolfactory.lstore)</label>
+          <outputname>hcss.ia.pal.poolfactory.lstore</outputname>
+          <tooltip>Local Store Factory class</tooltip>
+          <default>herschel.ia.pal.pool.lstore.LocalStoreFactory</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Db Factory (hcss.ia.pal.poolfactory.db)</label>
+          <outputname>hcss.ia.pal.poolfactory.db</outputname>
+          <tooltip>Local Store Factory class</tooltip>
+          <default>herschel.ia.pal.pool.db.DbFactory</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Cache Factory (hcss.ia.pal.poolfactory.cache)</label>
+          <outputname>hcss.ia.pal.poolfactory.cache</outputname>
+          <tooltip>Cached Pool Factory class</tooltip>
+          <default>herschel.ia.pal.pool.cache.CacheFactory</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Serial Client Factory (hcss.ia.pal.poolfactory.serial)</label>
+          <outputname>hcss.ia.pal.poolfactory.serial</outputname>
+          <tooltip>Serial Client Pool Factory class</tooltip>
+          <default>herschel.ia.pal.pool.serial.SerialClientFactory</default>
+      </property>
+  </tab>
+  <tab>
+      <tabname>PAL</tabname>
+      <property>
+          <fieldtype>menufield</fieldtype>
+          <label>isQuiet</label>
+          <outputname>hcss.ia.pal.query.isQuiet</outputname>
+          <tooltip>Controls whether non-existent meta data or attributes appearing the query will be quietly ignored.</tooltip>
+          <default>true</default>
+          <menuvalue>true</menuvalue>
+          <menuvalue>false</menuvalue>
+          <validationtype>Boolean</validationtype>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Simple pool store directory (hcss.ia.pal.pool.simple.dir)</label>
+          <outputname>hcss.ia.pal.pool.simple.dir</outputname>
+          <tooltip>Location of the simple pool store. Simple Pool will add the string '/simple.'</tooltip>
+          <default>${user.home}/.hcss</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Cache pool store directory (hcss.ia.pal.pool.cache.dir)</label>
+          <outputname>hcss.ia.pal.pool.cache.dir</outputname>
+          <tooltip>Location of the cache pool store. Cached Pool will add the string '/pal_cache'</tooltip>
+          <default>${user.home}/.hcss</default>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Performance test number of iterations (hcss.ia.pal.pool.performance.test)</label>
+          <outputname>hcss.ia.pal.pool.performancetest.size</outputname>
+          <tooltip>The number of items</tooltip>
+          <default>100</default>
+          <validationtype>Integer</validationtype>
+          <validationmin>10</validationmin>
+          <validationmax>64000</validationmax>
+      </property>
+      <property>
+          <fieldtype>textfield</fieldtype>
+          <label>Whether the storage is concurrently accessed (hcss.ia.pal.sharedMode)</label>
+          <outputname>hcss.ia.pal.sharedMode</outputname>
+          <tooltip>Whether the storage is shared</tooltip>
+          <default>false</default>
+          <validationtype>Boolean</validationtype>
+      </property>
+      <property>
+          <fieldtype>menufield</fieldtype>
+          <label>Depress warning in size calculation</label>
+          <outputname>hcss.ia.pal.sizecalculation.depresswarning</outputname>
+          <tooltip>Controls whether the warning message in size calculation(in PAL descriptors) will be ignored.</tooltip>
+          <default>true</default>
+          <menuvalue>true</menuvalue>
+          <menuvalue>false</menuvalue>
+          <validationtype>Boolean</validationtype>
+      </property>
+  </tab>
+</propconfig>

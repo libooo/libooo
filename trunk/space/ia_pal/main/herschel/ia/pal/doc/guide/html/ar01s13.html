@@ -1,0 +1,81 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>13.&nbsp;Storage and PoolManagers</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s12.html" title="12.&nbsp;Querying for products"><link rel="next" href="ar01s14.html" title="14.&nbsp;Extending the PAL"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">13.&nbsp;Storage and PoolManagers</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s12.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s14.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="managers"></a>13.&nbsp;Storage and PoolManagers</h2></div></div></div><p>
+The purpose of the StorageManager and PoolManagers is to enable users and site adminstrators to provide pre-configured
+ProductStorage and ProductPool instances that can be used by the individual user or users across that site.
+</p><p>
+The two main classes that the user uses is the StorageManager and PoolManager. These give access to the pre-configured
+ProductStorage and ProductPool instances.
+</p><p>
+Each ProductStorage and PoolStorage instance is defined by a configuration file. There are two currently supported formats for the configuration file: Jython and XML. Here are some simple examples of such file formats:</p><p>A Jython configuration file:
+<pre class="screen">
+## mypool.py ##
+pool = SimplePool.getInstance()
+</pre>
+</p><p>An XML configuration file:
+
+<pre class="screen">
+&lt;pool&gt;
+&lt;pool-type&gt;simple&lt;/pool-type&gt;
+&lt;param&gt;
+&lt;param-name&gt;id&lt;/param-name&gt;
+&lt;param-value&gt;devel&lt;/param-value&gt;
+&lt;/param&gt;
+&lt;/pool&gt;
+</pre>
+</p><p>The jython configuration file must end with the extension '.py' and the XML file with '.xml'. See the DP User Documentation for further details of the usage of these files.</p><p>
+The PoolManager is initialized through the following process:
+
+<div class="itemizedlist"><ul type="disc"><li><p>Each property matching the pattern 'hcss.ia.pal.pool.*' is examined.</p></li><li><p>The name of the ProductPool is taken from the last token of the property name, eg if the property name is
+'hcss.ia.pal.pool.a', the ProductPool name is 'a'. value of that property.</p></li><li><p>The value of that property corresponds to the location and name of the configuration file. </p></li><li><p>The configuration file is loaded, and depending on the format, a ProductPool instance is created. In the case of it being an XML file, the ProductPool is instantiated from a special PoolCreator class provided for that ProductPool type (see below).</p></li><li><p>The ProductPool instance is assigned to an internal map, with the key corresponding to the pool name.</p></li></ul></div>
+</p><p>
+The StorageManager is initialized in a similar fashion.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="xml-pool-creator"></a>13.1.&nbsp;Creating pools from XML: PoolCreator</h3></div></div></div><p>
+Each pool type (DbPool, FitsProductPool etc) requires different parameters to be instantiated. For XML configuration files, this corresponds to a different XML type, and a different loading strategy.</p><p>
+The loading strategy is delegated to the pool implementation. The ProductPool implementer must provide:
+
+<div class="itemizedlist"><ul type="disc"><li><p>A property specifying the class name of the PoolCreator implementation, to be included in the pal.xml property file of the ia_pal CVS module.
+</p></li><li><p>An implementation of the herschel.ia.pal.PoolCreator . 
+</p></li></ul></div>
+</p><p>
+The property must have the form
+
+<pre class="screen">
+hcss.ia.pal.poolfactory.&lt;type&gt;
+</pre>
+
+Where &lt;name&gt; is the name of the pool type.
+</p><p>
+The pal.xml file currently has knowledge of the properties and PoolCreator implementations
+for the following pool types: SimplePool, lstore, DbPool, CachedPool and the SerialClientPool.
+In the case of the SimplePool implementation, for example, 
+the pal.xml definitions file contains the following property name/value pair:
+
+<pre class="screen">
+hcss.ia.pal.poolfactory.simple=herschel.ia.pal.pool.simple.SimplePoolFactory
+</pre>
+
+The SimplePoolFactory class implements the PoolCreator interface.</p><p>
+The PoolCreator has one method:
+
+<pre class="screen">
+createPool(String strPoolType, Map&lt;String, String&gt; params)
+</pre>
+</p><p>
+The first argument, strPoolType, is the type of the ProductPool and is taken from the &lt;pool-type&gt; field of the XML configuration file. 
+This value must match the type of ProductPool that the PoolCreator implementation is addressing.
+</p><p>
+The types for the currently available pool implementations are:
+
+<div class="informaltable"><table border="0" style="border-collapse: collapse;"><colgroup><col><col></colgroup><thead><tr><th style="border-right: 1px solid ; border-bottom: 1px solid ; ">Pool Implementation</th><th style="border-bottom: 1px solid ; ">Pool Type</th></tr></thead><tbody><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">Local Store</td><td style="border-bottom: 1px solid ; ">lstore</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">DbPool</td><td style="border-bottom: 1px solid ; ">db</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">SimplePool</td><td style="border-bottom: 1px solid ; ">simple</td></tr><tr><td style="border-right: 1px solid ; border-bottom: 1px solid ; ">CachedPool</td><td style="border-bottom: 1px solid ; ">cache</td></tr><tr><td style="border-right: 1px solid ; ">SerialClientPool</td><td style="">serial</td></tr></tbody></table></div>
+
+</p><p>
+The second argument, params. is a map of parameter name-value pairs taken from the XML configuration file. These need again to be appropriate for the pool type. The createPool() method uses the params map to instantiate a ProductPool of that type.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="simplifiedConfiguration"></a>13.2.&nbsp;Simplified managers configuration</h3></div></div></div><p>
+In order to simplify things when configuring the pool and storage managers,
+it is allowed to use some defaults, so that when some configuration data
+is not specified, the managers will work with the defaults.
+</p><p>
+For a more detailed explanation of this simplified mechanism, please refer
+to the javadoc documentation of <a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/pal/PoolManager.html" target="_top">PoolManager</a>
+and <a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/api/herschel/ia/pal/StorageManager.html" target="_top">StorageManager</a>
+classes.
+</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s12.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s14.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">12.&nbsp;Querying for products&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;14.&nbsp;Extending the PAL</td></tr></table></div></body></html>

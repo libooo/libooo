@@ -1,0 +1,33 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.&nbsp;Storing products: ProductStorage and ProductPool</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s05.html" title="5.&nbsp;Walk-through"><link rel="next" href="ar01s07.html" title="7.&nbsp;Associating Products: Contexts"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">6.&nbsp;Storing products: ProductStorage and ProductPool</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s05.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s07.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="storage"></a>6.&nbsp;Storing products: ProductStorage and ProductPool</h2></div></div></div><p>
+
+As mentioned earlier, ProductPools are the implementations for the persistent storage repositories. 
+There are currently a number of different implementations for ProductPools 
+(eg file-based such as the SimplePool and lstore implementations; or a database implementation such as the DbPool).
+</p><p>
+The ProductStorage class provides the central interface for users
+and developers alike in terms of accessing products.
+This class is the basic storage area, and is created using <pre class="screen">storage=ProductStorage()</pre> 
+The product pools that you wish to use need to be registered to the product storage you have created. 
+More than one product pool can be registered to a specific ProductStorage.</p><p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left">
+When products are saved, they will be saved to the first pool that registered to the ProductStorage.
+</td></tr></table></div>
+</p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Caution"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Caution]" src="../images/caution.gif"></td><th align="left">Caution</th></tr><tr><td valign="top" align="left"><p>
+Developers are allowed to extend the Product class or any of its subclasses <span class="emphasis"><em>only in Java</em></span>.
+Trying to save in a ProductStorage products that belong to a class defined in Jython is not supported.
+See also the developer documentation of <a href="http://www.rssd.esa.int/SD-general/Projects/Herschel/hscdt/releases/doc/ia/dataset/doc/devel.html#dp.dataset.dg.SpecialDataset.javaonly" target="_top">ia_dataset</a>.
+</p></td></tr></table></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="productRef"></a>6.1.&nbsp;ProductRefs</h3></div></div></div><p>
+Sometimes what is needed during a session is to have a reference to a product, but not to have to necessarily load it into memory.
+This is important if a user needs to reference products of significantly large volumes, but only require, for example attribute information from
+each of those products.
+</p><p>
+The PAL minimizes the memory footprint by introducing the notion of a ProductRef. Access to any product in the PAL
+(i.e. via the ProductStorage load() and select() methods) returns not the direct
+product or set of products, but instead ProductRef objects that have internal knowledge of that product. 
+With a ProductRef, a user is able to access the attribute data, or the meta data of a product,
+without loading the complete product in memory. Should the user need to access further information, 
+the full contents may be loaded into memory using the ProductRef.getProduct() method.
+</p><p>When the referenced product is already saved, and the ProductRef is asked for retrieving it,
+it loads and returns the product, but doesn't keep it in memory, unless the product is a Context,
+in which case it's kept for further accesses. This mechanism saves space in memory when accessing
+heavyweight products.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s05.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s07.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">5.&nbsp;Walk-through&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;7.&nbsp;Associating Products: Contexts</td></tr></table></div></body></html>

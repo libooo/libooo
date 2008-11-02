@@ -1,0 +1,55 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>7.&nbsp;Versioning, tagging and descriptors</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-design.html" title="Product Access Layer Design"><link rel="up" href="pal-design.html" title="Product Access Layer Design"><link rel="prev" href="ar01s06.html" title="6.&nbsp;Storage and PoolManagers for configured ProductStorages and ProductPools"><link rel="next" href="ar01s08.html" title="8.&nbsp;Queries"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">7.&nbsp;Versioning, tagging and descriptors</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s06.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ar01s08.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="versioning"></a>7.&nbsp;Versioning, tagging and descriptors</h2></div></div></div><p>
+This section provides information about the support of PAL for:
+<div class="itemizedlist"><ul type="disc"><li>versions of the stored products</li><li>tags or alias to specific products</li><li>additional descriptive information per product, called "descriptors"</li></ul></div>
+as well as design aspects of these mechanisms.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="pal-product-versioning"></a>7.1.&nbsp;Product versioning</h3></div></div></div><p>
+Each stored product belongs to a version track, which is identified by a <span class="emphasis"><em>trackId</em></span>.
+</p><p>
+When a product is stored the first time, a new track is created for it, and version 0 is assigned to it.
+</p><p>
+When further versions of a stored product are saved, the track is maintained, and the version number is
+incremented to 1, 2, 3, etc.
+</p><p>
+The versioning information when saving a product is obtained by the auxiliary
+(package private) class <span class="emphasis"><em>VersionHandler</em></span>.
+</p><p>
+ProductPool extends the interface <span class="emphasis"><em>Versionable</em></span> for providing
+versioning support to the ProductStorage, like getting all the versions or the last version
+of a given track.
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left"><p>Each ProductPool is free for storing the versioning information in its own way.</p><p>It can be just stored along with other descriptors (see below).</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="pal-product-tagging"></a>7.2.&nbsp;Product tagging</h3></div></div></div><p>
+Each product is identified by its URN. However, a URN can be difficult to remember.
+For retrieving a product whose URN is unknown, a (possible expensive) query shall be done.
+</p><p>
+Tagging is a mechanism that allows a user to provide a meaningful name -tag or alias- to
+a given URN. Loading a product through its well known tag, which is a kind of
+index to the pointed product, is much faster than executing a query for finding it.
+</p><p>
+The tagging information of the products is managed by the auxiliary
+(package private) class <span class="emphasis"><em>TagsHandler</em></span>.
+</p><p>
+ProductPool extends the interface <span class="emphasis"><em>Taggable</em></span> for providing
+tagging support to the ProductStorage, like associating a tag to a urn, removing a tag,
+getting the urn of a given tag, or retrieving all defined tags.
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left"><p>
+There is a default implementation of the Taggable interface, provided by AbstractProductPool,
+which consists in storing the tags information in a special product, a <span class="emphasis"><em>TagsProduct</em></span>.
+</p><p>
+Any pool can override this implementation as needed.
+</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="pal-product-information"></a>7.3.&nbsp;Data, metadata and descriptors</h3></div></div></div><p>
+A product can contain what we call <span class="emphasis"><em>data</em></span> (datasets: ArrayDatasets, TableDatasets and/or CompositeDatasets), and
+<span class="emphasis"><em>metadata</em></span> (some of them are mandatory keys, called <span class="emphasis"><em>attributes</em></span>, like creator, startDate, etc.,
+and some are optional, or only required for specific kind of products, like obsid).
+</p><p>
+When saving a product, PAL stores additional information for each product,
+which are called <span class="emphasis"><em>descriptors</em></span>. The current ones are:
+<div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>trackId</em></span>: name of the version track</p></li><li><p><span class="emphasis"><em>version</em></span>: version number within the track</p></li><li><p><span class="emphasis"><em>size</em></span>: approximate size of the product, in bytes</p></li><li><p><span class="emphasis"><em>totalSize</em></span>: approximate size of the product and its children (if it's a Context), in bytes</p></li><li><p><span class="emphasis"><em>hash</em></span>: computed code for uniquely identifing the product</p></li></ul></div>
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="../images/note.gif"></td><th align="left">Note</th></tr><tr><td valign="top" align="left"><p>
+Unlike data and metadata, descriptors are not stored within the product; they are hold in memory by the ProductRef.
+</p><p>
+Each pool implementation can store the descriptors in its own way.
+</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="pal-key-class-interactions"></a>7.4.&nbsp;Key interactions during a save operation</h3></div></div></div>
+When a user requests to save a product, the key operations are as follows:
+
+<p>
+<div class="itemizedlist"><ul type="disc"><li><p>A ProductRef instance is created for that product, followed by a call to the commit() method with that ProductRef.</p></li><li><p>If the product already exists in the storage, it is not saved again.</p></li><li><p>Some descriptors, such as the product size, hash code, and version information are computed and stored in the ProductRef.</p></li><li><p>The ProductRef (that is, the product and its descriptors) is saved in the writable pool.</p></li><li><p>If the Product is a Context, additional information for keeping the references is stored also.</p></li></ul></div>
+</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s06.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ar01s08.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">6.&nbsp;Storage and PoolManagers for configured ProductStorages and ProductPools&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-design.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;8.&nbsp;Queries</td></tr></table></div></body></html>

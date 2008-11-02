@@ -1,0 +1,84 @@
+<section id="herschel.ia.pal.pool.urm">
+<title>Product Pools</title>
+
+  <simplesect>
+    <para>Before you can do something useful with a created ProductStorage, you
+      have to <link
+	linkend="herschel.ia.pal.ProductStorage.register(ProductPool)">register</link> one or more pools to that store.</para>
+    
+    <para>
+      Product pools are implementations that can load, save and query simple
+      Products. All pools share the same features (the so-called ProductPool
+      interface) such that they can be 
+      registered to a ProductStorage.</para>
+  </simplesect>
+  <simplesect>
+    <para>
+      Typically a User sets up one
+      ProductStorage and registers one or more Product pools to it. However the
+      design permits to create multiple ProductStorage devices with a
+      different registry of Product pools. Product pools can also be shared
+      between two ProductStorage devices.
+    </para>
+  </simplesect>
+  <simplesect>
+    <para>
+      Depending of the Product Pool implementation you have selected, the products
+      in such a pool can be stored on your local file system, talking to a
+      object-oriented database, a relational database etcetera.
+      You can even create your own ProductPool implementation (what about a
+      memory pool, such that you can query all the Products available in memory
+      of your JIDE session?).
+    </para>
+  </simplesect>
+
+  <section>
+    <title>Product Pool implementations</title>
+    <para>
+      The following ProductPool implementations are available in the 
+      <xref xrefstyle="select: title" linkend="herschel.ia.pal.urm"/>:
+    </para>
+
+    <variablelist termlength="100pt">
+      <varlistentry>
+	<term>SimplePool</term>
+	<listitem>
+	  <para>This simple implementation stores Products on your local file system
+	    with reasonable query performance up to a few thousand Products.</para>
+	</listitem>
+        </varlistentry>
+
+
+        <varlistentry>
+	<term>DbPool</term>
+	<listitem>
+	  <para>The DbPool stores Products in the Object (Versant)
+	    database.</para>
+	</listitem>
+      </varlistentry>
+
+        <varlistentry>
+	<term>CachedPool</term>
+	<listitem>
+	  <para>A prototype implementation to cache communications with a
+	    ProductPool on your local file system. Useful when you wish to work
+	    in a disconnected environment.</para>
+	</listitem>
+        </varlistentry>
+
+        <varlistentry>
+	<term>SerialClientPool</term>
+	<listitem>
+	  <para>A prototype implementation to set up a ProductPool
+	    server and an accompanying client.</para>
+	</listitem>
+        </varlistentry>
+    </variablelist>
+
+
+
+      
+  </section>
+
+</section>
+

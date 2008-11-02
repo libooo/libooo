@@ -1,0 +1,45 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>14.&nbsp;Extending the PAL</title><link href="../../css/common.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.68.1" name="generator"><link rel="start" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="up" href="pal-guide.html" title="Product Access Layer Developers Guide"><link rel="prev" href="ar01s13.html" title="13.&nbsp;Storage and PoolManagers"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">14.&nbsp;Extending the PAL</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ar01s13.html">Prev</a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;</td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="extending-pal"></a>14.&nbsp;Extending the PAL</h2></div></div></div><p>
+There are a number of classes and interfaces made available in the PAL framework for a developer to extend or implement.
+For example, developers are able to provide their own implementations of ProductPools, their own customized contexts,
+and their own customized rules. In this section, what can be extended, and important constraints, are discussed.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="pools"></a>14.1.&nbsp;Writing your own ProductPools</h3></div></div></div><p>
+
+The following constraints shall be met when writing a ProductPool:
+
+<div class="itemizedlist"><ul type="disc"><li><p>A pool should, naturally, implement the ProductPool interface.</p></li><li><p>Each Product saved shall be assigned to a unique URN.</p></li><li><p>Any Product that is stored in the pool should be accessible via a unique URN</p></li><li><p>It should be possible to save any Product. If not, it should be clearly documented any exceptions.</p></li></ul></div>
+
+In addition, a PoolCreator interface implementation and associated property must be defined (<a href="ar01s13.html#xml-pool-creator" title="13.1.&nbsp;Creating pools from XML: PoolCreator">Section&nbsp;13.1, &ldquo;Creating pools from XML: PoolCreator&rdquo;</a>).
+
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="writing-contexts"></a>14.2.&nbsp;Writing your own Contexts</h3></div></div></div><p>
+A developer can write his own Context subclass by extending the abstract Context class, or extending one of the supplied concrete derivations, MapContext or ListContext.
+</p><p>
+It is strongly recommended that the developer ascertains whether using MapContext or ListContext, or deriving from MapContext or ListContext, would suit his needs,
+as creating a full concrete implementation by directly subclassing the Context class is significant work. 
+</p><p>
+Whatever the approach the developer takes, the following constraints shall be met when writing a Context:
+
+<div class="itemizedlist"><ul type="disc"><li><p>It should, naturally, extend the Context abstract class.</p></li><li><p>A context should be designed to be as lightweight as possible, such that the heavyweight data containers are leaf products.</p></li><li><p>When possible, assign rules to constrain what Products shall and shall not be allowed in the context.</p></li></ul></div>
+
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="writing-rules"></a>14.2.1.&nbsp;Writing your own Rules for Contexts</h4></div></div></div><p>
+The standard Context types supplied, MapContext and ListContext, allow a developer to supply his own rules by simply extending one of those
+classes, and overriding the respective getAddingRule() method. 
+</p><p>
+When extending the Context class directly, the developer would need to provide additional code along similar lines to what are provided in the MapContext or ListContext classes.
+It is suggested that the developer browse through the source code of one of these classes for further information.
+</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="writing-tests"></a>14.3.&nbsp;Writing test harnesses for the PAL: the PAL common test suite</h3></div></div></div><p>
+When extending the PAL, specifically when adding new ProductPool implementations, 
+it is highly recommended to run a common set of tests that verify the quality of that pool implementation.
+</p><p>
+The common set of tests are available under the test tree of the ia_pal package. To make use of the common tests, the pool implementor should write a test class that:
+
+<div class="itemizedlist"><ul type="disc"><li><p>Extends the abstract class herschel.ia.pal.CommonPalTestSet (note that this is only available in the parallel test tree)</p></li><li><p>Provides implementations for the methods createPool(), setUp(), tearDown(), oneTimeSetUp(), and oneTimeTearDown().</p></li></ul></div>
+</p><p>
+For an example, look at the herschel.ia.pal.pool.simple.SimplePoolTest, of the CVS module
+ia_pal_pool_simple. This is also in the parallel test tree.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="contrib-common-test"></a>14.3.1.&nbsp;Contributing to the PAL common test suite</h4></div></div></div><p>
+If you wish to contribute a test method to the PAL common test suite, the process is a little more complicated, but as follows:</p><p>
+<div class="itemizedlist"><ul type="disc"><li><p>Choose a name for your test method that is unique to the list in the CommonPalTestSet class.It should start with the string 'test'.</p></li><li><p>Choose a *PalTestGroup instance you want your test method to belong to. 
+If you prefer to write a completely new PalTestGroup, do so. You need to extend the AbstractPalTestGroup class. </p></li><li><p>Update the appropriate PalTestGroup class, adding your method.</p></li><li><p>Update the CommonPalTestSet class, adding a method of the same name as your test. In that method, call the method you added in the PalTestGroup class.</p></li></ul></div>
+</p><p>
+There are a number of examples in the ia_pal test harness if you need an illustration.
+</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ar01s13.html">Prev</a>&nbsp;</td><td align="center" width="20%">&nbsp;</td><td align="right" width="40%">&nbsp;</td></tr><tr><td valign="top" align="left" width="40%">13.&nbsp;Storage and PoolManagers&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="pal-guide.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;</td></tr></table></div></body></html>

@@ -1,0 +1,94 @@
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+ul, ol, dl, dt, dd {
+    padding: 0 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 10px 0;
+    color: #3366CC;
+}
+
+img {
+    border: 0 none;
+}
+
+body {
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 83%;
+    margin: 10px;
+}
+
+form {
+    margin-bottom: 10px;
+}
+
+button img {
+    margin-bottom: -2px;
+    display: inline;
+}
+
+.result {
+    margin-bottom: 0.6em;
+    width: 34em;
+}
+
+.result a {
+    font-size: 110%;
+    white-space: nowrap;
+}
+
+.visibleUrl {
+    color: #008000;
+}
+
+.pageIndex {
+    color: #A90A08;
+    font-weight: bold;
+}
+
+.excluded, .excluded h3, .excluded .visibleUrl {
+    color: #999999;
+}
+
+.excluded a {
+    color: #9999FF;
+}
+
+
+.branding {
+    margin-bottom: 5px;
+}
+
+.branding img {
+    display: inline;
+    margin-bottom: -5px;
+}
+
+#footer {
+    margin-top: 10px;
+    font-size: 75%;
+    text-align: center;
+    width: 100%;
+}
+
+ul.feeds {
+    font-size: 121%;
+    margin-left: 14px;
+    list-style-image: url("/static/img/feed.png");
+    margin-bottom: 20px;
+}
+
+ul.feeds li {
+    margin-bottom: 2px;
+}
+
+.submit {
+    margin-right: 10px;
+}

@@ -1,0 +1,21 @@
+$def with (feed, entries)
+<feed xmlns="http://www.w3.org/2005/Atom">
+<title>Daily Results: $feed.name</title>
+<link rel="self" href="http://lever.appspot.com/search/feed?name=$urlEncode(feed.name)"/>
+<link rel="alternate" type="text/html" href="http://lever.appspot.com/search?q=$urlEncode(feed.query)"/>
+<updated>$formatDatetime(feed.updated)</updated>
+<author>
+<name>Lever: making work easier</name>
+</author>
+<id>tag:lever.appspot.com,2008:search/feed?name=$urlEncode(feed.name)</id>
+$for entry in entries:
+    <entry>
+    <title type="html">$entry.title</title>
+    <link href="$entry.link"/>
+    <id>tag:lever.appspot.com,2008:search/feed?name=$urlEncode(feed.name)#$entry.index</id>
+    <updated>$formatDatetime(entry.updated)</updated>
+    <summary type="html">$entry.summary</summary>
+    <contributor><name>clipped from Google - $formatDatetime(entry.updated)</name></contributor>
+    </entry>
+</feed>
+

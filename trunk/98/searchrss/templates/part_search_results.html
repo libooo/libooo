@@ -1,0 +1,8 @@
+$def with (results)
+$for result in results:
+    <div class="result">
+        <a href="$result['unescapedUrl']">$:result["title"]</a><br/>
+        $:result["content"]
+        <div class="visibleUrl">$result["visibleUrl"]</div>
+    </div>
+$#

@@ -1,0 +1,17 @@
+$def with (query, results, excluded)
+<h1>Today's Relevant Results</h1>
+$:render.form_search(query, enableFeedme=True)
+$:render.part_search_results(results)
+
+$if len(results) == 0:
+    Found <b>$len(results)</b> relevant results for today.
+$if excluded:
+    <div class="excluded">
+    <h3>Excluded:</h3>
+    $:render.part_search_results(excluded)
+    </div>
+$#
+
+<p class="branding">
+Powered by <img alt="Google" class="branding" src="http://www.google.com/uds/css/small-logo.png"/>, <a href="http://www.google.com/search?as_qdr=d&amp;q=$urlEncode(query)">clipped from Google - $formatDay()</a>
+</p>

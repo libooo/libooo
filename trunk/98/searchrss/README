@@ -1,0 +1,16 @@
+Daily Search Results (searchrss)
+================================
+- Web app to convert Google search results to RSS.
+
+It runs at:
+http://uselever.com/
+
+Code resides at:
+http://code.google.com/p/searchrss/
+
+See INSTALL how to run it on your own Google App Engine account.
+
+Author:
+Ivo Danihelka
+<ivo@danihelka.net>
+

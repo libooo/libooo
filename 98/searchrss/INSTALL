@@ -1,0 +1,32 @@
+
+How to run it
+=============
+1) Setup:
+- Get web.py 0.23. It is used to render the templates:
+$ wget http://webpy.org/static/web.py-0.23.tar.gz
+$ tar xzf web.py-0.23.tar.gz
+$ ln -s webpy/web web
+
+- Get a Google App Engine account:
+http://appengine.google.com/
+
+- Change application name inside app.yaml
+application: your-app-name
+
+
+2) Test it locally:
+$ path/to/google_appengine/dev_appserver.py .
+
+$ firefox http://localhost:8080
+
+
+3) Deploy it on App Engine:
+$ path/to/google_appengine/appcfg.py update .
+
+$ firefox http://your-app-name.appspot.com
+
+
+4) Ensure refreshing of the feeds:
+$ wget http://your-app-name.com/compute
+    ... do it regularly (use cron or http://host-tracker.com/ )
+

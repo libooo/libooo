@@ -1,0 +1,10 @@
+$def with (feeds)
+
+<h1>Daily Search Results</h1>
+Popular feeds:
+<ul class="feeds">
+$for feed in feeds:
+    <li><a href="/search/feed?name=$urlEncode(feed.name)">$feed.name</a> ($feed.nEntries entries) <a href="/search?q=$urlEncode(feed.query)">search</a></li>
+$#
+</ul>
+$:render.form_search("")

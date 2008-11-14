@@ -1,0 +1,9 @@
+$def with (query, enableFeedme=False)
+<form action="/search" method="get">
+    <div>
+    <input name="q" type="text" size="41" value="$query"/>
+    <input class="submit" type="submit" value="Search Today's Web"/>
+    $if enableFeedme:
+        <button name="feedme" value="1">Generate daily updated feed <img alt="" src="/static/img/feed.png"/></button>
+    </div>
+</form>

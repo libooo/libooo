@@ -33,3 +33,19 @@ for item in results:
 print pool.context.storeDir
 
 }}}
+
+  * HttpPool Config 
+
+{{{
+tomcat launch config: 
+VM args:  
+-Dcatalina.base="E:\NAO\Code\.metadata\.plugins\org.eclipse.wst.server.core\tmp0" -Dcatalina.home="D:\dev\apache-tomcat-6.0.14" -Dwtp.deploy="E:\NAO\Code\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps" -Djava.endorsed.dirs="D:\dev\apache-tomcat-6.0.14\common\endorsed"
+-Dproject_loc="E:\NAO\Code\ia_pal_pool_http" -Dhcss_default="${hcss_default}" -Dproperty.path="E:\NAO\Code\ia_pal_pool_http\coverage.properties"
+
+
+coverage.properties
+增加： 
+project_loc = E:\NAO\Code\ia_pal_pool_http
+
+copy 整个 herschel编译后代码到 ${var.hcsstest.dir}/lib  （Jython 库路径）
+}}}

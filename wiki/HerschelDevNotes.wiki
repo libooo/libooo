@@ -1,0 +1,35 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Herschel Development notes:
+
+
+= Details =
+
+  * get products from Hsa
+
+{{{
+
+from herschel.ia.pal.pool.hsa import *
+from herschel.ia.pal.pool.lstore import *
+urlHaio = 'http://archives.esac.esa.int/hsa/aio/jsp/'
+
+archive = HsaReadPool(urlHaio+'metadata.jsp',urlHaio+'product.jsp')
+
+hsaStore = ProductStorage(archive)
+
+results = hsaStore.select (Query(ObservationContext,"1"))
+
+print results
+
+pool = PoolManager.getPool("test")
+
+for item in results:
+	pool.save(item.product)
+	pass
+
+
+print pool.context.storeDir
+
+}}}
